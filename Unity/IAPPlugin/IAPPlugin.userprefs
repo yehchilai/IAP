@@ -1,0 +1,16 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/IABGUI.cs">
+    <Files>
+      <File FileName="Assets/Scripts/IAB.cs" Line="10" Column="15" />
+      <File FileName="Assets/Scripts/IABGUI.cs" Line="30" Column="15" />
+      <File FileName="Assets/Scripts/GalleryTest.cs" Line="32" Column="85" />
+      <File FileName="../../../../../../../../Volumes/Macintosh HD 1/DownLoad/OpenIAB-Unity-Plugin-master/unity_plugin/unity_src/Assets/Plugins/OpenIAB/Android/OpenIAB_Android.cs" Line="147" Column="62" />
+      <File FileName="Assets/Scripts/Buttons.cs" Line="9" Column="3" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
