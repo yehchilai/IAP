@@ -1,8 +1,0 @@
-<resources>
-    <string name="app_name">NativeAndoirdTest</string>
-
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
-
-    <string name="button_buy">BUY</string>
-</resources>
