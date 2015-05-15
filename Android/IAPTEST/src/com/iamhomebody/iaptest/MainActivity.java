@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
 	// SKUs for our products
     static final String SKU_COINS = "produt_2_coin";
     static final String SKU_PRODUCT = "COIN";
-    static final String SKU_TEST = "com.andoid";
+    static final String SKU_TEST = "android.test";
     
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,11 +89,11 @@ public class MainActivity extends ActionBarActivity {
 	       }
 	      
 	      List<String> productDetails = inventory.getAllOwnedSkus();
-//	      SkuDetails productDetails = inventory.getSkuDetails(SKU_COINS);
+//	      SkuDetails productD = inventory.getSkuDetails(SKU_TEST);
 
 	      if (productDetails != null){
-	    	  Log.d(TAG,"Deck price is: " + productDetails.size());
-//	    	  Log.d(TAG,"Deck price is: " + productDetails.getPrice());
+	    	  Log.d(TAG,"Deck amount is : " + productDetails.size());
+//	    	  Log.d(TAG,"Deck price is: " + productD.getPrice());
 	      }else{
 
 	    	  Log.d(TAG,"No Product Detail" );
@@ -102,10 +102,37 @@ public class MainActivity extends ActionBarActivity {
 	   }
 	};
 	
+	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener 
+	   = new IabHelper.OnIabPurchaseFinishedListener() {
+	   public void onIabPurchaseFinished(IabResult result, Purchase purchase) 
+	   {
+	      if (result.isFailure()) {
+	         Log.d(TAG, "### Error purchasing: " + result);
+	         return;
+	      }      
+	      else if (purchase.getSku().equals(SKU_TEST)) {
+	    	  Log.d(TAG, "### Get Test Product !!!");
+	         // consume the gas and update the UI
+	      }
+	      else if (purchase.getSku().equals(SKU_COINS)) {
+	         // give user access to premium content and update the UI
+	      }
+	   }
+	};
+	
 	private void buy(){
 		Log.d(TAG, "Click Button !! ");
-		String[] moreSkus = {SKU_COINS};
-		mHelper.queryInventoryAsync(true, Arrays.asList(moreSkus), mQueryFinishedListener);
+		
+		// Purchase Product
+		mHelper.launchPurchaseFlow(this, SKU_TEST, 10001,   
+				   mPurchaseFinishedListener, "");
+		
+		//Query Inventory
+//		String[] moreSkus = {SKU_COINS};
+//		mHelper.queryInventoryAsync(true, Arrays.asList(moreSkus), mQueryFinishedListener);
+		
+		
+		
 //		List additionalSkuList = new List();
 //		additionalSkuList.add(SKU_COINS);
 //		mHelper.queryInventoryAsync(true, additionalSkuList,
