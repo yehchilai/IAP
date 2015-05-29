@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iap.util;
 
 import android.app.Activity;
 import android.app.PendingIntent;

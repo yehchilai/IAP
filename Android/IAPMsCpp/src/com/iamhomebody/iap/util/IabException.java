@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iap.util;
 
 /**
  * Exception thrown when something went wrong with in-app billing.

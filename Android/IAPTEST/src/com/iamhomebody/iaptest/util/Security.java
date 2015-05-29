@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iaptest.util;
 
 import android.text.TextUtils;
 import android.util.Log;

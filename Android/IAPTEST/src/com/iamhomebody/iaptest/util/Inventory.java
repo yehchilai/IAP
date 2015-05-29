@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iaptest.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class Inventory {
     }
 
     /** Returns a list of all owned product IDs. */
-    List<String> getAllOwnedSkus() {
+    public List<String> getAllOwnedSkus() {
         return new ArrayList<String>(mPurchaseMap.keySet());
     }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iap.util;
 
 import org.json.JSONException;
 import org.json.JSONObject;

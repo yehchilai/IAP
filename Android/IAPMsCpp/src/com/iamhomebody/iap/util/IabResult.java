@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.iamhomebody.iaptest;
+package com.iamhomebody.iap.util;
 
 /**
  * Represents the result of an in-app billing operation.

@@ -18,9 +18,31 @@
         android:id="@+id/purchase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:onClick="onBuyGasButtonClicked"
         android:layout_alignLeft="@+id/textView1"
         android:layout_below="@+id/textView1"
         android:layout_marginTop="30dp"
         android:text="@string/purchase" />
+
+    <Button
+        android:id="@+id/button1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onBuyItemButtonClicked"
+        android:layout_alignLeft="@+id/purchase"
+        android:layout_below="@+id/purchase"
+        android:layout_marginTop="18dp"
+        android:text="@string/buy" />
+
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onConsumeButtonClicked"
+        android:layout_alignBaseline="@+id/purchase"
+        android:layout_alignBottom="@+id/purchase"
+        android:layout_marginLeft="18dp"
+        android:layout_toRightOf="@+id/purchase"
+        android:text="@string/consume" />
 
 </RelativeLayout>
