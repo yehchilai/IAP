@@ -171,8 +171,6 @@ public class MainActivity extends Activity {
             else {
             	Log.d(TAG, "### Error while consuming: " + result);
             }
-            
-            
             Log.d(TAG, "### End consumption flow.");
         }
     };

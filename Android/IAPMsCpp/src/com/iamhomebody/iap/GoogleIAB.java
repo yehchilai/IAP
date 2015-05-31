@@ -1,11 +1,16 @@
 package com.iamhomebody.iap;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.android.vending.billing.IInAppBillingService;
+import com.iamhomebody.iap.util.IabHelper;
+import com.iamhomebody.iap.util.IabResult;
+import com.iamhomebody.iap.util.Inventory;
+import com.iamhomebody.iap.util.Purchase;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -18,133 +23,172 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
 import com.unity3d.player.*;
 
 public class GoogleIAB extends Activity {
 	
-	@Override
-	protected void onStart() {
-		// TODO Auto-generated method stub
-		super.onStart();
-		buy();
-	}
-
-	IInAppBillingService mService;
-	ServiceConnection mServiceConn;
-	private String mPremiumUpgradePrice;
-	private String mGasPrice;
+	protected static final String TAG = "IAMHOMEBODY_IAB";
 	
+	IabHelper mHelper;
+	
+	// SKUs for our products
+    static final String SKU_TEST = "android.test.purchased";
+    
+    // (arbitrary) request code for the purchase flow
+    static final int RC_REQUEST = 10001;
+    
+	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+		public void onQueryInventoryFinished(IabResult result, Inventory inventory){
+	      
+			if (result.isFailure()) {
+	    	 
+	         // handle error
+	    	 Log.d(TAG, "### result.isFailure() error");
+	         return;
+	       }
+	      
+	      List<String> productDetails = inventory.getAllOwnedSkus();
+	
+	      if (productDetails != null){
+	    	  Log.d(TAG,"### Deck amount is : " + productDetails.size());
+	      }else{
+	    	  Log.d(TAG,"### No Product Detail" );
+	      }
+	       // update the UI 
+	    }
+	};
+   
+   // Called when consumption is complete
+   IabHelper.OnConsumeFinishedListener mConsumeFinishedListener = new IabHelper.OnConsumeFinishedListener() {
+       public void onConsumeFinished(Purchase purchase, IabResult result) {
+           Log.d(TAG, "### Consumption finished. Purchase: " + purchase + ", result: " + result);
+
+           // if we were disposed of in the meantime, quit.
+           if (mHelper == null) return;
+
+           // We know this is the "gas" sku because it's the only one we consume,
+           // so we don't check which sku was consumed. If you have more than one
+           // sku, you probably should check...
+           if (result.isSuccess()) {
+               // successfully consumed, so we apply the effects of the item in our
+               // game world's logic, which in our case means filling the gas tank a bit
+               Log.d(TAG, "### Consumption successful. Provisioning.");
+            
+           }
+           else {
+           	Log.d(TAG, "### Error while consuming: " + result);
+           }
+           
+           Log.d(TAG, "### End consumption flow.");
+       }
+   };   
+
+	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
+		   public void onIabPurchaseFinished(IabResult result, Purchase purchase) {
+			   Log.d(TAG, "### Purchase finished: " + result + ", purchase: " + purchase);
+			   // if we were disposed of in the meantime, quit.
+	           if (mHelper == null) return;
+
+	           if (result.isFailure()) {
+	        	   
+			         Log.d(TAG, "### Error purchasing: " + result);
+			         return;
+			      }    
+			      else if (purchase.getSku().equals(SKU_TEST)) {
+			    	  Log.d(TAG, "### Get Test Product !!!");
+			    	  Log.d(TAG, "### Purchase is TEST. Starting TEST consumption.");
+		              mHelper.consumeAsync(purchase, mConsumeFinishedListener);
+			         // consume the gas and update the UI
+			      }
+		   	}
+		};
+		
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		//Log.e("### ","onCreate START");
-		//setContentView(R.layout.activity_list_item);
-		Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
-		//Log.e("### ","serviceIntent START");
-		serviceIntent.setPackage("com.android.vending");
-		//Log.e("### ","serviceIntent.setPackage START");
-		mServiceConn = new ServiceConnection() {
-			   @Override
-			   public void onServiceDisconnected(ComponentName name) {
-			       mService = null;
-			       Log.e("### ","mService = null;");
-			   }
+		Log.d(TAG, "### OnCreate IABTEST");
+	       
+	    String base64EncodedPublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuC+EuTAkKk0YottDyfUjfMXzEBfTrx9MPjiyWEAxJLxXh1ejOj8fvlnGGRCDCUHv7lr17Hap5v+I9JfCuKt0VbUv5mfq/ockfUdMLCiMPHHL26Xgpco9+i8jjZnxsndyto9cF2Qs4FYZfCTObj5QP5WdVlO9vr6fvc7SUVS4YBOGvP9D7fLu8hVk8C1Cw54UVojruM9iQCKjKnP0xHkxQX/sCH/zLbBtFofUzLRlRkqZBCi9vkDSRAEN54KDByx862ticFOtTMabJ5J6YQIvU/bR4T9+EDyeU00pufmcRZqdef74A/vwVAu7y1MK+NSiXYmf3UF1+avK2akBn3K3SwIDAQAB";
+	    // compute your public key and store it in base64EncodedPublicKey
+	    mHelper = new IabHelper(this, base64EncodedPublicKey);
+	   
+	    // enable debug logging (for a production application, you should set this to false).
+        mHelper.enableDebugLogging(true);
 
-			   @Override
-			   public void onServiceConnected(ComponentName name, 
-			      IBinder service) {
-			       mService = IInAppBillingService.Stub.asInterface(service);
-			       Log.e("### ","mService = IInAppBillingService.Stub.asInterface(service)");
-			       //UnityPlayer.UnitySendMessage("OnBuy", "OnBuy", "purchase");
-			   }
-			};
-		bindService(serviceIntent, mServiceConn, Context.BIND_AUTO_CREATE);
-		 
-		//Log.e("### ","bindService");
-		//buy();
+	    mHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
+		   public void onIabSetupFinished(IabResult result) {
+			   Log.d(TAG, "### Setup finished.");
+			   
+		      if (!result.isSuccess()) {
+		         // Oh noes, there was a problem.
+		         Log.d(TAG, "### Problem setting up In-app Billing: " + result);
+		      }
+		   // Have we been disposed of in the meantime? If so, quit.
+              if (mHelper == null) return;
+              Log.d(TAG, "### Setup successful. Querying inventory.");
+              mHelper.queryInventoryAsync(mGotInventoryListener);
+		   }
+		});		   
 	}
 	
 	public void buy(){
-		Log.e("### ","buy");
-		ArrayList<String> skuList = new ArrayList<String> ();
-		skuList.add("android.test.purchased");
-		skuList.add("gas");
-		Bundle querySkus = new Bundle();
-		querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
-		Log.e("### ","TRY");
-		try {
-			Log.e("### ","Before skuDetails");
-			Bundle skuDetails = mService.getSkuDetails(3, 
-					   getPackageName(), "inapp", querySkus);
-			Log.e("### ","skuDetails");
-			int response = skuDetails.getInt("RESPONSE_CODE");
-			Log.e("### ","response");
-			if (response == 0) {
-			   ArrayList<String> responseList
-			      = skuDetails.getStringArrayList("DETAILS_LIST");
-			   
-			   for (String thisResponse : responseList) {
-			      JSONObject object = new JSONObject(thisResponse);
-			      String sku = object.getString("productId");
-			      String price = object.getString("price");
-			      if (sku.equals("premiumUpgrade")) mPremiumUpgradePrice = price;
-			      else if (sku.equals("gas")) mGasPrice = price;
-			      
-			      Bundle buyIntentBundle = mService.getBuyIntent(3, getPackageName(),
-						   sku, "inapp", "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ");
-			      
-			      PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
-			      
-			      startIntentSenderForResult(pendingIntent.getIntentSender(),
-			    		   1001, new Intent(), Integer.valueOf(0), Integer.valueOf(0),
-			    		   Integer.valueOf(0));
-			   }
-			   
-			}
-		} catch (RemoteException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SendIntentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 
+	/** Verifies the developer payload of a purchase. */
+    boolean verifyDeveloperPayload(Purchase p) {
+        String payload = p.getDeveloperPayload();
+
+        /*
+         * TODO: verify that the developer payload of the purchase is correct. It will be
+         * the same one that you sent when initiating the purchase.
+         *
+         * WARNING: Locally generating a random string when starting a purchase and
+         * verifying it here might seem like a good approach, but this will fail in the
+         * case where the user purchases an item on one device and then uses your app on
+         * a different device, because on the other device you will not have access to the
+         * random string you originally generated.
+         *
+         * So a good developer payload has these characteristics:
+         *
+         * 1. If two different users purchase an item, the payload is different between them,
+         *    so that one user's purchase can't be replayed to another user.
+         *
+         * 2. The payload must be such that you can verify it even when the app wasn't the
+         *    one who initiated the purchase flow (so that items purchased by the user on
+         *    one device work on other devices owned by the user).
+         *
+         * Using your own server to store and verify developer payloads across app
+         * installations is recommended.
+         */
+
+        return true;
+    }
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) { 
-		Log.e("### ","onActivityResult");
-		if (requestCode == 1001) {           
-	      int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
-	      String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
-	      String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
-	      
-	      Log.e("### ","responseCode : " + responseCode);
-	      Log.e("### ","dataSignature : " + dataSignature);
-	      UnityPlayer.UnitySendMessage("OnBuy", "OnBuy", purchaseData);
-	      if (resultCode == RESULT_OK) {
-	         try {
-	            JSONObject jo = new JSONObject(purchaseData);
-	            String sku = jo.getString("productId");
-	            Log.e("### ","You have bought the " + sku + ". Excellent choice,adventurer!");
-	          }
-	          catch (JSONException e) {
-	        	  Log.i("### ","Failed to parse purchase data.");
-	             e.printStackTrace();
-	          }
-	      }
-	   }
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult(" + requestCode + "," + resultCode + "," + data);
+		if (mHelper == null) return;
+		
+		// Pass on the activity result to the helper for handling
+		if (!mHelper.handleActivityResult(requestCode, resultCode, data)) {
+		    // not handled, so handle it ourselves (here's where you'd
+		// perform any handling of activity results not related to in-app
+		// billing...
+		    super.onActivityResult(requestCode, resultCode, data);
+		}
+		else {
+		    Log.d(TAG, "onActivityResult handled by IABUtil.");
+		    }
 	}
+
 	
 	@Override
 	public void onDestroy() {
-	    super.onDestroy();
-	    if (mService != null) {
-	        unbindService(mServiceConn);
-	    }   
+	   super.onDestroy();
+	   if (mHelper != null) mHelper.dispose();
+	   mHelper = null;
 	}
 	
 }
