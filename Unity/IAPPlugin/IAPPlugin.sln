@@ -1,6 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2008
 
+Project("{63FF618E-2487-0312-9CE4-D7AC5EF9252D}") = "IAPPlugin", "Assembly-CSharp-firstpass.csproj", "{9752EC2D-68F5-C902-6B56-52545DBCC336}"
+EndProject
 Project("{63FF618E-2487-0312-9CE4-D7AC5EF9252D}") = "IAPPlugin", "Assembly-CSharp.csproj", "{DEEB7C7B-3B02-8A29-AF11-96C09B327D8D}"
 EndProject
 Global
@@ -9,6 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9752EC2D-68F5-C902-6B56-52545DBCC336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9752EC2D-68F5-C902-6B56-52545DBCC336}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9752EC2D-68F5-C902-6B56-52545DBCC336}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9752EC2D-68F5-C902-6B56-52545DBCC336}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DEEB7C7B-3B02-8A29-AF11-96C09B327D8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DEEB7C7B-3B02-8A29-AF11-96C09B327D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DEEB7C7B-3B02-8A29-AF11-96C09B327D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -17,7 +23,7 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-															GlobalSection(MonoDevelopProperties) = preSolution
+																											GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

@@ -48,12 +48,15 @@
   <ItemGroup>
      <Compile Include="Assets\Scripts\Buttons.cs" />
      <Compile Include="Assets\Scripts\GalleryTest.cs" />
-     <Compile Include="Assets\Scripts\IAB.cs" />
      <Compile Include="Assets\Scripts\IABGUI.cs" />
      <None Include="Assets\Plugins\Android\AndroidManifest.xml" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity462/Unity462.app/Contents/UnityExtensions/Unity/GUISystem/4.6.2/UnityEngine.UI.dll</HintPath>
  </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass-vs.csproj">
+      <Project>{9752EC2D-68F5-C902-6B56-52545DBCC336}</Project>      <Name>Assembly-CSharp-firstpass-vs</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
