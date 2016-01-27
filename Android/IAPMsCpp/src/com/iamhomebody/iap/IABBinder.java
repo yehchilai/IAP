@@ -1,5 +1,7 @@
 package com.iamhomebody.iap;
 
+import java.util.Arrays;
+
 import com.iamhomebody.iap.util.*;
 import com.unity3d.player.UnityPlayer;
 
@@ -14,8 +16,9 @@ public class IABBinder {
 	private Activity mActivity;
 	private IabHelper mIabHelper;
 	private String mEventHandler;
+	private Inventory myInventory;
 	
-	
+	// Constructor and initialize the IAB functionality
 	public IABBinder(String base64EncodedPublicKey, String strEventHandler){
 		mActivity = UnityPlayer.currentActivity;
 		mEventHandler = strEventHandler;
@@ -26,7 +29,7 @@ public class IABBinder {
 		
 		mIabHelper = new IabHelper(mActivity, base64EncodedPublicKey);
 		
-		mIabHelper.enableDebugLogging(true);
+		mIabHelper.enableDebugLogging(true); // Turn to false when the app is published
 		
 		mIabHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 			
@@ -35,6 +38,7 @@ public class IABBinder {
 				// TODO Auto-generated method stub
 				if(!result.isSuccess()){
 					// sent a message to Unity gameObject with JSON format
+					// UnitySendMessage(GameObject Name, Function Name, Agrs)
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
 					dispose();
 					return;
@@ -42,6 +46,9 @@ public class IABBinder {
 				
 				// sent a message to Unity gameObject with JSON format
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
+				
+				// get inventory
+				mIabHelper.queryInventoryAsync(mGotInventoryListener);
 				
 				// register callback function in IabActivity
 				IABActivity.registerOnActivityResultCallbackFunction(new IABActivity.callbackEvent() {
@@ -63,7 +70,36 @@ public class IABBinder {
 		
 	}
 
+	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
 
+	    public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+	    	
+	    	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Inventory" + result.getMessage());
+			
+	    	if (result.isFailure()){
+	    		
+	    	}else{
+	    		
+	    		myInventory = inventory;
+	    		
+	    		if (inventory.hasPurchase("android.test.purchased")) {
+		        	
+		        	mIabHelper.consumeAsync(inventory.getPurchase("android.test.purchased"), null);
+		        }
+	    	}
+	        
+//	        
+//			if (result.isFailure()) {
+//			    // handle error here
+//			  }
+//			  else {
+//			    // does the user have the premium upgrade?
+//			//mIsPremium = inventory.hasPurchase(SKU_PREMIUM);        
+//			// update UI accordingly
+//			  }
+	    }
+	};
+	
 	public void dispose() {
 		// TODO Auto-generated method stub
 		if(mIabHelper != null){
@@ -73,6 +109,33 @@ public class IABBinder {
 		mIabHelper = null;
 	}
 	
+	// Get inventory information
+	public void inventoryInfo(String[] skus){
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Inventory Request !!!");
+		//mIabHelper.queryInventoryAsync(mGotInventoryListener);
+		//ArrayList<String> list = (ArrayList<String>) Arrays.asList(skus); 
+		//mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), mGotInventoryListener);
+		
+		if(myInventory != null){
+			for(String sku:skus){
+				SkuDetails detail = myInventory.getSkuDetails(sku);
+				if(detail != null){
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
+							"Product: " + detail.getTitle() +
+							"\nPrice: " + detail.getPrice() +
+							"\nDescription" + detail.getDescription() +"\n");
+				}else{
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
+				}
+				
+			}
+		}else{
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
+		}
+	}
+	
+	
+	// Purchase products
 	public void purchase(String SKU, String requestCode, String payload){
 		int code = Integer.parseInt(requestCode);
 		if(mIabHelper != null){
@@ -107,6 +170,7 @@ public class IABBinder {
 		}
 	};
 	
+	// Consume products
 	public void consume(String itemType, String purchaseJSON, String signature){
 		String json = purchaseJSON.replace('\"', '\'');
 		if(mIabHelper == null){

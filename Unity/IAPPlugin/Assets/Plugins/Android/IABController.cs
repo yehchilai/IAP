@@ -2,13 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class IABController {
+public class IABController{
 
 	public delegate void callbackEventHandler(object[] resultArray);
 
 	private callbackEventHandler iabSetupCallback;
 	private callbackEventHandler iabPurchaseCallback;
 	private callbackEventHandler iabConsumeCallback;
+	private callbackEventHandler iabInventoryCallback;
+
+	// Message from the jar library
+	public string mMessage = "Message from the jar library\n";
 
 	AndroidJavaObject mIabHelperObj;
 
@@ -43,6 +47,15 @@ public class IABController {
 		}
 	}
 
+	public void inventoryInfo(string[] skus, callbackEventHandler tmpIabInventoryCBFunc){
+		if(instance == null) return;
+		
+		instance.iabInventoryCallback = tmpIabInventoryCBFunc;
+		
+		if(instance.mIabHelperObj != null)
+			instance.mIabHelperObj.Call("inventoryInfo", new object[1]{skus});
+	}
+
 	public void purchase(string SKU, int requestCode, string payload, callbackEventHandler tmpIabPurchaseCBFunc){
 
 		if(instance == null) return;
@@ -65,28 +78,39 @@ public class IABController {
 
 	public void msgReceiver(string message){
 		if(instance == null) return;
-
-		Dictionary<string,object> json = MiniJSON.Json.Deserialize(message) as Dictionary<string,object>;
-		if(json.ContainsKey("code") == true){
-			int value = 0;
-			int.TryParse((string)json["code"], out value);
-			switch(value){
-			case 0:
-
-				Debug.Log("Unity-IABBundle :cannot parse json[code]");
-
-				break;
-			case 1:
-				codeCase(json, 1, iabSetupCallback);
-				break;
-			case 2:
-				codeCase(json, 2, iabPurchaseCallback);
-				break;
-			case 3:
-				codeCase(json, 3, iabConsumeCallback);
-				break;
-			}
-		}
+		mMessage += "\n### Unity nsgReceiver..." + message;
+		Debug.Log("### Unity nsgReceiver...");
+//		Dictionary<string,object> json = MiniJSON.Json.Deserialize(message) as Dictionary<string,object>;
+//		if(json.ContainsKey("code") == true){
+//			int value = 0;
+//			int.TryParse((string)json["code"], out value);
+//			switch(value){
+//			case 0:
+//				mMessage += "\n### Unity-IABBundle :cannot parse json[code]\n ### " + message;
+//
+//				Debug.Log("### Unity-IABBundle :cannot parse json[code]");
+//
+//				break;
+//			case 1:
+//				codeCase(json, 1, iabSetupCallback);
+//				mMessage += "\n### Unity-IABBundle : json = 1, " + json.ToString();
+//				Debug.Log("### Unity-IABBundle : json = 1, " + json.ToString());
+//
+//				break;
+//			case 2:
+//				codeCase(json, 2, iabPurchaseCallback);
+//				mMessage += "\n### Unity-IABBundle : json = 2, : " + json.ToString();
+//				Debug.Log("### Unity-IABBundle : json = 2, : " + json.ToString());
+//
+//				break;
+//			case 3:
+//				codeCase(json, 3, iabConsumeCallback);
+//				mMessage += "\n### Unity-IABBundle : json =3 , : " + json.ToString();
+//				
+//
+//				break;
+//			}
+//		}
 	}
 
 	public void codeCase(Dictionary<string,object> json, int code, callbackEventHandler callback){

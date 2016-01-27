@@ -1,10 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace />
-  <MonoDevelop.Ide.Workbench ActiveDocument="../../../../../../Documents/work/MarcCompany/Unity/IAPResearch/Assets/Plugins/IAPCombo/IAP.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/IABGUI.cs">
     <Files>
-      <File FileName="../../../../../../Documents/work/MarcCompany/Unity/IAPResearch/Assets/Plugins/IAPCombo/demo/IAPComboUI.cs" Line="50" Column="28" />
-      <File FileName="../../../../../../Documents/work/MarcCompany/Unity/IAPResearch/Assets/Plugins/IAPCombo/IAP.cs" Line="144" Column="59" />
-      <File FileName="../../../../../../Documents/work/MarcCompany/Unity/IAPResearch/Assets/Plugins/InAppBillingAndroid/GoogleIAB.cs" Line="18" Column="11" />
+      <File FileName="Assets/Plugins/Android/IABController.cs" Line="71" Column="53" />
+      <File FileName="Assets/Scripts/IABGUI.cs" Line="12" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
