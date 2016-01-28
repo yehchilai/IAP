@@ -9,10 +9,26 @@ public class IABGUI : MonoBehaviour {
 
 	public GUIStyle myStyle;
 	public Vector2 scrollPosition = Vector2.zero;
-	//private float scrollerValue;
+	private float scrollerValueV;
+	private float scrollerValueH;
+	public GUIStyle scrollerV;
+	public GUIStyle scrollerH;
+
 
 	void Start () {
+		string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmqNHL8jWtWPShIQVQEWVfj4MBejOpqT5yB6+g3u7uM99roiOISXmhS6Kaxfd6I2nWl05bSqCxzJxVlXOb/6QVHiBlbHvZkT3zmLRKD8k2sEqgRJJM/12GmdMXH/aoz4vcdq6Wp5KpOh3HgoPkE7eDlddKsXPuodOQOVcXh0GN2RQWRhC/sIE8hnED6m3fFLVHeJlBpSe8y3uGGpxrrlH6hcP4e66aMsMPn4zzPeEQA+Ir911oq0uB7n9O9mh1uPYcQMPfxktON6/cNX9UpEucKDxHpkmmaqwZuyGhZ+a4zBZXPFrUi1q+FhUn8KTpOkHgC/EEF52l0j2pZtHtuLNpwIDAQAB";
+		iabCtrl.init(PUBLIC_KEY, delegate (object[] ret){
+			if (true ==(bool)ret[0]){
+				Debug.Log("### iab successfully initialized");
+			}
+			else{
+				Debug.Log("### failed to initialize iab");
+			}
+		});
 
+//		iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
+//		iabCtrl.inventoryInfo(new string[]{"product_1_coin", "produt_2_coin", "coin"}, delegate(object[] resultArray) {
+//		});
 	}
 
 	#if UNITY_ANDROID
@@ -21,7 +37,10 @@ public class IABGUI : MonoBehaviour {
 	/// </summary>
 	void OnGUI(){
 
-		//scrollerValue = GUI.VerticalScrollbar(new Rect(300, 10, 300, 300), scrollerValue, 1.0f, 0.0f, 10.0f);
+		//scrollerValueV = GUI.VerticalScrollbar(new Rect(300, 10, 300, 300), scrollerValueV, 3.0f, 0.0f, 10.0f);
+		//scrollerValueH = GUI.HorizontalScrollbar(new Rect(10, 300, 300, 300), scrollerValueH, 3.0f, 0.0f, 10.0f);
+
+
 		scrollPosition = GUI.BeginScrollView(new Rect(300, 10, 300, 300), scrollPosition, new Rect(0, 0, 1000, 2000));
 		GUILayout.Label(iabCtrl.mMessage);
 		//GUI.Label(new Rect(0, 0, 290, 2000), innerText + iabCtrl.mMessage);
@@ -32,18 +51,18 @@ public class IABGUI : MonoBehaviour {
 
 		// Initial Button
 		if(GUI.Button(new Rect(10,10,256,256), "INIT")){
-
-			string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAp75ekSrDG4AWaAR2C2QLm+yWsVJHl3McElBKShAEUuuX7I25dFowHDpO8CFC92n55AgGcZ98/hnuaiEfnmuhbrJiKRppTAoXvNFY4uh45DpSrLDSrIFQGAJ9iJZT9Pb3PK5ruB+B86EfRAUdgROp0bDqDk1TIYoZqch89HdVCjQQ9vYS5ya4n5hRlhEhpv20XQGlR+D8L72NMDha1igZn3GHG9W3EdpZVjpgxjR3NWwR/2GznvLianOAGxyMZd8DbNnBEFwmVl7YYqatTlPb6w1x/2sTGkAJ4peRDxFXLnnf48Fl1j1pXg7+7Q/n1/IRbeJOfWjYpYELOF8LlapJrQIDAQAB";
-			iabCtrl.init(PUBLIC_KEY, delegate (object[] ret){
-					if (true ==(bool)ret[0]){
-						Debug.Log("### iab successfully initialized");
-					}
-					else{
-						Debug.Log("### failed to initialize iab");
-					}
-				});
-
-			Debug.Log("### UNITY BUTTON INIT START");
+//			iabCtrl.queryInventory();
+//			string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmqNHL8jWtWPShIQVQEWVfj4MBejOpqT5yB6+g3u7uM99roiOISXmhS6Kaxfd6I2nWl05bSqCxzJxVlXOb/6QVHiBlbHvZkT3zmLRKD8k2sEqgRJJM/12GmdMXH/aoz4vcdq6Wp5KpOh3HgoPkE7eDlddKsXPuodOQOVcXh0GN2RQWRhC/sIE8hnED6m3fFLVHeJlBpSe8y3uGGpxrrlH6hcP4e66aMsMPn4zzPeEQA+Ir911oq0uB7n9O9mh1uPYcQMPfxktON6/cNX9UpEucKDxHpkmmaqwZuyGhZ+a4zBZXPFrUi1q+FhUn8KTpOkHgC/EEF52l0j2pZtHtuLNpwIDAQAB";
+//				iabCtrl.init(PUBLIC_KEY, delegate (object[] ret){
+//					if (true ==(bool)ret[0]){
+//						Debug.Log("### iab successfully initialized");
+//					}
+//					else{
+//						Debug.Log("### failed to initialize iab");
+//					}
+//				});
+//
+//			Debug.Log("### UNITY BUTTON INIT START");
 		}
 
 		// Inventory Button
@@ -64,7 +83,7 @@ public class IABGUI : MonoBehaviour {
 
 		// Purchase Button
 		if(GUI.Button(new Rect(350,350,256,256), "BUY")){
-			string SKU = "android.test.purchased";
+			string SKU = "coin";
 			string payload = "";
 			iabCtrl.purchase(SKU, 1001, payload, delegate(object[] resultArray) {
 				if (false ==(bool)resultArray[0]){

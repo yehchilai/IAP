@@ -5,7 +5,7 @@
  * should not be modified by hand.
  */
 
-package com.iamhomebody.iap;
+package com.iamhomebody.MsProject;
 
 public final class R {
     public static final class attr {

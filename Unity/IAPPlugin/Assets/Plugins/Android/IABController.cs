@@ -47,6 +47,16 @@ public class IABController{
 		}
 	}
 
+	public void queryInventory(string[] skus){
+		if(instance == null) return;
+		
+		if(instance.mIabHelperObj != null){
+			AndroidJNI.AttachCurrentThread();
+			instance.mIabHelperObj.Call("queryInventory", new object[]{skus});
+		}
+//			instance.mIabHelperObj.Call("queryInventory", new object[]{skus});
+	}
+
 	public void inventoryInfo(string[] skus, callbackEventHandler tmpIabInventoryCBFunc){
 		if(instance == null) return;
 		
