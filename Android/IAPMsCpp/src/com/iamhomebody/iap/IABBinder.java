@@ -8,8 +8,6 @@ import com.unity3d.player.UnityPlayerActivity;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Looper;
 
 import com.iamhomebody.iap.IABActivity;;
 
@@ -53,21 +51,7 @@ public class IABBinder {
 				
 				// get inventory - check the consumable items
 //				mIabHelper.queryInventoryAsync(mGotInventoryListener);
-				// get inventory information
-//				mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
-//					
-//					@Override
-//					public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-//						// TODO Auto-generated method stub
-//						if (result.isFailure()){
-//				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
-//				    	}else{
-//				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
-//					    	myInventory = inv;
-//				    	}
-//						
-//					}
-//				});
+
 				// register callback function in IabActivity
 				IABActivity.registerOnActivityResultCallbackFunction(new IABActivity.callbackEvent() {
 					
@@ -109,16 +93,6 @@ public class IABBinder {
 		        	mIabHelper.consumeAsync(inventory.getPurchase("coin"), mConsumeFinishedListener);
 		        }
 	    	}
-	        
-//	        
-//			if (result.isFailure()) {
-//			    // handle error here
-//			  }
-//			  else {
-//			    // does the user have the premium upgrade?
-//			//mIsPremium = inventory.hasPurchase(SKU_PREMIUM);        
-//			// update UI accordingly
-//			  }
 	    }
 	};
 	
@@ -134,9 +108,6 @@ public class IABBinder {
 	// query inventory
 	public void queryInventory(final String[] skus){
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Query Inventory !!! ");
-		//mIabHelper.queryInventoryAsync(mGotInventoryListener);
-		
-		//////////////////////////
 		UnityPlayer.currentActivity.runOnUiThread(new Runnable(){
 
 			@Override
@@ -154,16 +125,11 @@ public class IABBinder {
 			}
 			
 		});
-		
-		///////////////////
 	}
 	
 	// Get inventory information
 	public void inventoryInfo(String[] skus){
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Inventory Request !!!");
-		//mIabHelper.queryInventoryAsync(mGotInventoryListener);
-		//ArrayList<String> list = (ArrayList<String>) Arrays.asList(skus); 
-		//mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), mGotInventoryListener);
 		
 		if(myInventory != null){
 			for(String sku:skus){
