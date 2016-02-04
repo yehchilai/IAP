@@ -51,6 +51,7 @@ public class IABGUI : MonoBehaviour {
 
 		// Initial Button
 		if(GUI.Button(new Rect(10,10,256,256), "INIT")){
+			iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
 //			iabCtrl.queryInventory();
 //			string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmqNHL8jWtWPShIQVQEWVfj4MBejOpqT5yB6+g3u7uM99roiOISXmhS6Kaxfd6I2nWl05bSqCxzJxVlXOb/6QVHiBlbHvZkT3zmLRKD8k2sEqgRJJM/12GmdMXH/aoz4vcdq6Wp5KpOh3HgoPkE7eDlddKsXPuodOQOVcXh0GN2RQWRhC/sIE8hnED6m3fFLVHeJlBpSe8y3uGGpxrrlH6hcP4e66aMsMPn4zzPeEQA+Ir911oq0uB7n9O9mh1uPYcQMPfxktON6/cNX9UpEucKDxHpkmmaqwZuyGhZ+a4zBZXPFrUi1q+FhUn8KTpOkHgC/EEF52l0j2pZtHtuLNpwIDAQAB";
 //				iabCtrl.init(PUBLIC_KEY, delegate (object[] ret){

@@ -1,7 +1,7 @@
 package com.iamhomebody.iap;
 
 import java.util.Arrays;
-
+import com.iamhomebody.ms.*;
 import com.iamhomebody.iap.util.*;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
@@ -21,9 +21,6 @@ public class IABBinder {
 	private String mEventHandler;
 	private Inventory myInventory;
 	private String[] skus = {"product_1_coin", "produt_2_coin", "coin"};
-	
-	
-
 	
 	// Constructor and initialize the IAB functionality
 	public IABBinder(String base64EncodedPublicKey, String strEventHandler){
@@ -54,41 +51,23 @@ public class IABBinder {
 				// sent a message to Unity gameObject with JSON format
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
 				
-				// get inventory
-				//mIabHelper.queryInventoryAsync(mGotInventoryListener);
-				mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
-					
-					@Override
-					public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-						// TODO Auto-generated method stub
-						if (result.isFailure()){
-				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
-				    	}else{
-				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
-					    	myInventory = inv;
-//				    		String[] skus = {"product_1_coin", "produt_2_coin", "coin"};
-//				    		if(inv != null){
-//				    			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JavaInventoryToString: " + inv.toString());
-//				    			
-//				    			for(String sku:skus){
-//				    				SkuDetails detail = inv.getSkuDetails(sku);
-//				    				if(detail != null){
-//				    					UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
-//				    							"Product: " + detail.getTitle() +
-//				    							"\nPrice: " + detail.getPrice() +
-//				    							"\nDescription" + detail.getDescription() +"\n");
-//				    				}else{
-//				    					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
-//				    				}
-//				    				
-//				    			}
-//				    		}else{
-//				    			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
-//				    		}
-				    	}
-						
-					}
-				});
+				// get inventory - check the consumable items
+//				mIabHelper.queryInventoryAsync(mGotInventoryListener);
+				// get inventory information
+//				mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
+//					
+//					@Override
+//					public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+//						// TODO Auto-generated method stub
+//						if (result.isFailure()){
+//				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
+//				    	}else{
+//				    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
+//					    	myInventory = inv;
+//				    	}
+//						
+//					}
+//				});
 				// register callback function in IabActivity
 				IABActivity.registerOnActivityResultCallbackFunction(new IABActivity.callbackEvent() {
 					
@@ -118,26 +97,6 @@ public class IABBinder {
 	    	if (result.isFailure()){
 	    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
 	    	}else{
-//	    		String[] skus = {"product_1_coin", "produt_2_coin", "coin"};
-//	    		if(inventory != null){
-//	    			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JavaInventoryToString: " + inventory.toString());
-//	    			
-//	    			for(String sku:skus){
-//	    				SkuDetails detail = inventory.getSkuDetails(sku);
-//	    				if(detail != null){
-//	    					UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
-//	    							"Product: " + detail.getTitle() +
-//	    							"\nPrice: " + detail.getPrice() +
-//	    							"\nDescription" + detail.getDescription() +"\n");
-//	    				}else{
-//	    					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
-//	    				}
-//	    				
-//	    			}
-//	    		}else{
-//	    			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
-//	    		}
-	    		
 	    		
 	    		if (inventory.hasPurchase("product_1_coin")) {
 		        	
@@ -173,20 +132,29 @@ public class IABBinder {
 	}
 	
 	// query inventory
-	public void queryInventory(String[] skus){
+	public void queryInventory(final String[] skus){
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Query Inventory !!! ");
 		//mIabHelper.queryInventoryAsync(mGotInventoryListener);
 		
 		//////////////////////////
-		mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
-			
+		UnityPlayer.currentActivity.runOnUiThread(new Runnable(){
+
 			@Override
-			public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+			public void run() {
 				// TODO Auto-generated method stub
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
-		    	myInventory = inv;
+				mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
+					
+					@Override
+					public void onQueryInventoryFinished(IabResult result, Inventory inv) {
+						// TODO Auto-generated method stub
+						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
+				    	myInventory = inv;
+					}
+				});
 			}
+			
 		});
+		
 		///////////////////
 	}
 	
