@@ -2,15 +2,19 @@ package com.iamhomebody.iap;
 
 import java.io.File;
 import java.util.Arrays;
+
 import com.iamhomebody.ms.*;
 import com.iamhomebody.iap.util.*;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Toast;
+
 import com.iamhomebody.iap.IABActivity;;
 
 public class IABBinder {
@@ -24,9 +28,9 @@ public class IABBinder {
 	
 	// Data Store
 	SharedPreferences mSharedPreferences;
-	SharedPreferences mSharedPreferencesKey;
+//	SharedPreferences mSharedPreferencesKey;
 	private static final String PREFS_NAME = "com.iamhomebody.iap";
-	private static final String PREFS_NAME_KEY = "com.iamhomebody.iapKey";
+//	private static final String PREFS_NAME_KEY = "com.iamhomebody.iapKey";
 	private static final String FILE_KEY = "securityInfo";
 	
 	// Constructor and initialize the IAB functionality
@@ -36,31 +40,24 @@ public class IABBinder {
 		mEventHandler = strEventHandler;
 		// Get sharedPreferences instance
 		mSharedPreferences = mActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		mSharedPreferencesKey = mActivity.getSharedPreferences(PREFS_NAME_KEY, Context.MODE_PRIVATE);
-//		SharedPreferences.Editor editorKey  = mSharedPreferencesKey.edit();
-//		// Put the key
-//		editorKey.putString(FILE_KEY, "Test");
-//		editorKey.commit();
-//		// Get editor instance to put values in the XML file
-//		SharedPreferences.Editor editor  = mSharedPreferences.edit();
-//		// Put the calue in the XML file by using Key = PRODUCT_KEY, Value = 1
-//		editor.putInt("test", 10);
-//		editor.commit();
-		String info = mSharedPreferencesKey.getString(FILE_KEY, "NO_FILE");
-		if(info.equals("NO_FILE")){
+		String info = mSharedPreferences.getString(FILE_KEY, "NO_KEY");
+		if(info.equals("NO_KEY")){
 			try {
+				// Put the Tmp key
+				if(putString(FILE_KEY, "key")){
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-encryptedText: Tmp key successful");
+				}else{
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
+				}
+				
 				HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
 				String str = hsa.calculateHSA();
 				AES aes = new AES();
 				byte[] encryptedTextByte = aes.encrypt(str, aes.mSecretKey);
 				String encryptedText = new String(encryptedTextByte);
 				
-				// Get editor instance to put values in the XML file
-				SharedPreferences.Editor editor  = mSharedPreferencesKey.edit();
 				// Put the key
-				editor.putString(FILE_KEY, encryptedText);
-				boolean isSaved = editor.commit();
-				if(isSaved){
+				if(putString(FILE_KEY, encryptedText)){
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-encryptedText: " + encryptedText);
 				}else{
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
@@ -313,7 +310,7 @@ public class IABBinder {
 		}
 	};
 	
-	public void setData(String productKey, int value){
+	private void setData(String productKey, int value){
 		
 		// Get editor instance to put values in the XML file
 		SharedPreferences.Editor editor  = mSharedPreferences.edit();
@@ -327,11 +324,30 @@ public class IABBinder {
 		// Commit the put value
 		boolean isSaved = editor.commit();
 		// Show if the data is saved successfully
-		if(isSaved){
+		if(isSaved && putString(FILE_KEY, "key")){
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + String.valueOf(value) +" , "+String.valueOf(tmp));
 		}else{
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + " DOES NOT BE SEAVED.");
 		}
+		
+		// update hsa
+		HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+		String current = hsa.calculateHSA();
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-update hsa: " + current);
+		try {
+			AES aes = new AES();
+			byte[] encryptedTextByte = aes.encrypt(current, aes.mSecretKey);
+			String encryptedText = new String(encryptedTextByte);
+			
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
+			// write the key back
+			if(!putString(FILE_KEY, encryptedText)){
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: Fail to write the key");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		
 		// Get the XML file Path
 		File file = new File(mActivity.getFilesDir().getParent(), "shared_prefs");
@@ -345,30 +361,46 @@ public class IABBinder {
 	}
 	
 //	@SuppressLint("SdCardPath")
-	public boolean checkFile(){
+	private boolean checkFile(){
 		String current;
-		HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
-		current = hsa.calculateHSA();
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-current: " + current);
+		String tmp = mSharedPreferences.getString(FILE_KEY, "NO_FILE");
 		boolean isEqual = false;
-		try {
-			AES aes = new AES();
-			String info = mSharedPreferencesKey.getString(FILE_KEY, "NO_FILE");
-			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: " + info);
-			if(!info.equals("NO_FILE")){
-				byte[] decryptedTextByte = aes.decrypt(info.getBytes(), aes.mSecretKey);
-				String decryptedText = new String(decryptedTextByte);
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-decryptedText: " + decryptedText);
-				isEqual = current.equals(decryptedText);
-			}else{
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: The app is compromised- " + info);
-				return false;
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
+		// put tmp key
+		if(putString(FILE_KEY, "key")){
+			HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+			current = hsa.calculateHSA();
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-current: " + current);
+			try {
+				AES aes = new AES();
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: " + tmp);
+				if(!tmp.equals("NO_FILE")){
+					byte[] decryptedTextByte = aes.decrypt(tmp.getBytes(), aes.mSecretKey);
+					String decryptedText = new String(decryptedTextByte);
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-decryptedText: " + decryptedText);
+					isEqual = current.equals(decryptedText);
+					// write the key back
+					if(!putString(FILE_KEY, tmp)){
+						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile: Fail to write the key");
+					}
+				}else{
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: The app is compromised- " + tmp);
+					Toast.makeText(mActivity, "The data is compromised!", Toast.LENGTH_LONG).show();
+					return false;
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+		
 		return isEqual;
 	}
 	
+	private boolean putString(String str, String str2){
+		// Get editor instance to put values in the XML file
+		SharedPreferences.Editor editor  = mSharedPreferences.edit();
+		// Put the Tmp key
+		editor.putString(str, str2);
+		return editor.commit();
+	}
 }
