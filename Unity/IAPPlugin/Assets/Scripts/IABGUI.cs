@@ -111,11 +111,8 @@ public class IABGUI : MonoBehaviour {
 		// Consume Button
 		if(GUI.Button(new Rect(10,300,256,256), "CONSUME")){
 
-			string purchase = "{\"packageName\":\"com.iamhomebody.iaptest\","+
-				"\"orderId\":\"transactionId.android.test.purchased\","+
-					"\"productId\":\"android.test.purchased\",\"developerPayload\":\"\",\"purchaseTime\":0,"+
-					"\"purchaseState\":0,\"purchaseToken\":\"inapp:com.iamhomebody.iaptest :android.test.purchased\"}";
-			iabCtrl.consumeInapp(purchase, "", 
+			string[] purchase = {"coin"};
+			iabCtrl.consumeProduct(purchase, 
 			                     delegate(object[] ret2){
 				if (false ==(bool)ret2[0])
 				{
@@ -124,6 +121,19 @@ public class IABGUI : MonoBehaviour {
 					Debug.Log("### Consumption successful");
 				}
 			});
+//			string purchase = "{\"packageName\":\"com.iamhomebody.MsProject\","+
+//				"\"orderId\":\"transactionId.android.test.purchased\","+
+//					"\"productId\":\"android.test.purchased\",\"developerPayload\":\"\",\"purchaseTime\":0,"+
+//					"\"purchaseState\":0,\"purchaseToken\":\"inapp:com.iamhomebody.iaptest :android.test.purchased\"}";
+//			iabCtrl.consumeInapp(purchase, "", 
+//			                     delegate(object[] ret2){
+//				if (false ==(bool)ret2[0])
+//				{
+//					Debug.Log("### failed to consume product");
+//				}else if(true == (bool)ret2[0]){
+//					Debug.Log("### Consumption successful");
+//				}
+//			});
 		}
 	}
 

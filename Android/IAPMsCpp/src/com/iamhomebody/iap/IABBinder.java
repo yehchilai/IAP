@@ -1,14 +1,16 @@
 package com.iamhomebody.iap;
 
+import java.io.File;
 import java.util.Arrays;
 import com.iamhomebody.ms.*;
 import com.iamhomebody.iap.util.*;
 import com.unity3d.player.UnityPlayer;
 import com.unity3d.player.UnityPlayerActivity;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-
+import android.content.SharedPreferences;
 import com.iamhomebody.iap.IABActivity;;
 
 public class IABBinder {
@@ -20,10 +22,56 @@ public class IABBinder {
 	private Inventory myInventory;
 	private String[] skus = {"product_1_coin", "produt_2_coin", "coin"};
 	
+	// Data Store
+	SharedPreferences mSharedPreferences;
+	SharedPreferences mSharedPreferencesKey;
+	private static final String PREFS_NAME = "com.iamhomebody.iap";
+	private static final String PREFS_NAME_KEY = "com.iamhomebody.iapKey";
+	private static final String FILE_KEY = "securityInfo";
+	
 	// Constructor and initialize the IAB functionality
+	@SuppressLint("CommitPrefEdits")
 	public IABBinder(String base64EncodedPublicKey, String strEventHandler){
 		mActivity = UnityPlayer.currentActivity;
 		mEventHandler = strEventHandler;
+		// Get sharedPreferences instance
+		mSharedPreferences = mActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		mSharedPreferencesKey = mActivity.getSharedPreferences(PREFS_NAME_KEY, Context.MODE_PRIVATE);
+//		SharedPreferences.Editor editorKey  = mSharedPreferencesKey.edit();
+//		// Put the key
+//		editorKey.putString(FILE_KEY, "Test");
+//		editorKey.commit();
+//		// Get editor instance to put values in the XML file
+//		SharedPreferences.Editor editor  = mSharedPreferences.edit();
+//		// Put the calue in the XML file by using Key = PRODUCT_KEY, Value = 1
+//		editor.putInt("test", 10);
+//		editor.commit();
+		String info = mSharedPreferencesKey.getString(FILE_KEY, "NO_FILE");
+		if(info.equals("NO_FILE")){
+			try {
+				HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+				String str = hsa.calculateHSA();
+				AES aes = new AES();
+				byte[] encryptedTextByte = aes.encrypt(str, aes.mSecretKey);
+				String encryptedText = new String(encryptedTextByte);
+				
+				// Get editor instance to put values in the XML file
+				SharedPreferences.Editor editor  = mSharedPreferencesKey.edit();
+				// Put the key
+				editor.putString(FILE_KEY, encryptedText);
+				boolean isSaved = editor.commit();
+				if(isSaved){
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-encryptedText: " + encryptedText);
+				}else{
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}else{
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile: Has File.");
+		}
 		
 		if(mIabHelper != null){
 			dispose();
@@ -149,12 +197,52 @@ public class IABBinder {
 		}
 	}
 	
+	// Consume product from the inventory information
+		public void consumeProduct(final String[] skus){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Consume product form the Inventory Request !!!");
+			
+			if(myInventory != null){
+				UnityPlayer.currentActivity.runOnUiThread(new Runnable(){
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						for(String sku:skus){
+							if (myInventory.hasPurchase(sku)) {
+					        	
+					        	mIabHelper.consumeAsync(myInventory.getPurchase(sku), mConsumeFinishedListener);
+					        	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeProduct: " + sku);
+					        }
+//							SkuDetails detail = myInventory.getSkuDetails(sku);
+//							if(detail != null){
+//								UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
+//										"Product: " + detail.getTitle() +
+//										"\nPrice: " + detail.getPrice() +
+//										"\nDescription" + detail.getDescription() +"\n");
+//							}else{
+//								UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
+//							}
+						}
+						
+					}
+					
+				});
+				
+			}else{
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
+			}
+		}
+	
 	
 	// Purchase products
 	public void purchase(String SKU, String requestCode, String payload){
 		int code = Integer.parseInt(requestCode);
-		if(mIabHelper != null){
+		if(mIabHelper != null && checkFile()){
 			mIabHelper.launchPurchaseFlow(mActivity, SKU, code, mPurchaseFinishedListener, payload);
+		}else{
+			if(!checkFile()){
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process: File Data has been compromised");
+			}
 		}
 	}
 	
@@ -177,10 +265,11 @@ public class IABBinder {
 				if(info != null){
 					resultJSON = info.getOriginalJson().replace('\"', '\'');
 					resultSignature = info.getSignature();
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getSku: " + info.getSku());	
 				}
 				
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
-				
+				setData(skus[0], 1);
 			}
 		}
 	};
@@ -223,4 +312,63 @@ public class IABBinder {
 			}
 		}
 	};
+	
+	public void setData(String productKey, int value){
+		
+		// Get editor instance to put values in the XML file
+		SharedPreferences.Editor editor  = mSharedPreferences.edit();
+		// Put the calue in the XML file by using Key = PRODUCT_KEY, Value = 1
+		int tmp = mSharedPreferences.getInt(productKey, Integer.MIN_VALUE);
+		if( tmp == Integer.MIN_VALUE){
+			editor.putInt(productKey, value);
+		}else{
+			editor.putInt(productKey, tmp + value);
+		}
+		// Commit the put value
+		boolean isSaved = editor.commit();
+		// Show if the data is saved successfully
+		if(isSaved){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + String.valueOf(value) +" , "+String.valueOf(tmp));
+		}else{
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + " DOES NOT BE SEAVED.");
+		}
+		
+		// Get the XML file Path
+		File file = new File(mActivity.getFilesDir().getParent(), "shared_prefs");
+		
+		if (file.isDirectory()) {
+			String[] names = file.list();
+			for(int i = 0; i < names.length ; i++){
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Data Path: " + file.getPath() + "Child Path : " + names[i]);
+			}
+		}
+	}
+	
+//	@SuppressLint("SdCardPath")
+	public boolean checkFile(){
+		String current;
+		HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+		current = hsa.calculateHSA();
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-current: " + current);
+		boolean isEqual = false;
+		try {
+			AES aes = new AES();
+			String info = mSharedPreferencesKey.getString(FILE_KEY, "NO_FILE");
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: " + info);
+			if(!info.equals("NO_FILE")){
+				byte[] decryptedTextByte = aes.decrypt(info.getBytes(), aes.mSecretKey);
+				String decryptedText = new String(decryptedTextByte);
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-decryptedText: " + decryptedText);
+				isEqual = current.equals(decryptedText);
+			}else{
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: The app is compromised- " + info);
+				return false;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return isEqual;
+	}
+	
 }

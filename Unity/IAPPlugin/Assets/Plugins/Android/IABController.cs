@@ -86,6 +86,17 @@ public class IABController{
 			instance.mIabHelperObj.Call("consume", new object[3]{"inapp", purchaseJSON, signature});
 	}
 
+	// consume product from inventory info
+	public void consumeProduct(string[] skus, callbackEventHandler tmpIabConsumeCBFunc){
+		
+		if(instance == null) return;
+		
+		instance.iabConsumeCallback = tmpIabConsumeCBFunc;
+		
+		if(instance.mIabHelperObj != null)
+			instance.mIabHelperObj.Call("consumeProduct", new object[1]{skus});
+	}
+
 	public void msgReceiver(string message){
 		if(instance == null) return;
 		mMessage += "\n### Unity nsgReceiver..." + message;
