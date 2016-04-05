@@ -114,7 +114,6 @@ public class IABBinder {
 				
 			}
 		});
-		
 	}
 
 	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
@@ -187,7 +186,6 @@ public class IABBinder {
 				}else{
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
 				}
-				
 			}
 		}else{
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
@@ -309,6 +307,56 @@ public class IABBinder {
 			}
 		}
 	};
+	
+	// consume purchased and saved product
+	public boolean consumeLoacalProduct(String sku, int value){
+		if(!checkFile()){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: The data is compromised!");
+			return false;
+		}
+		int tmp = mSharedPreferences.getInt(sku, Integer.MIN_VALUE);
+		if(tmp == Integer.MIN_VALUE){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: The is no purchased product!");
+			return false;
+		}else if(value > tmp){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: The product amount is not enough!");
+			return false;
+		}else{
+			// Get editor instance to put values in the XML file
+			SharedPreferences.Editor editor  = mSharedPreferences.edit();
+			// Put the calue in the XML file by using Key = PRODUCT_KEY, Value = 1
+			int tmpInt = mSharedPreferences.getInt(sku, Integer.MIN_VALUE);
+			editor.putInt(sku, tmp - value);
+			// Commit the put value
+			boolean isSaved = editor.commit();
+			// Show if the data is saved successfully
+			if(isSaved && putString(FILE_KEY, "key")){
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: " + sku + String.valueOf(tmp - value) +" , "+String.valueOf(value));
+			}else{
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: " + sku + " DOES NOT CONSUMED.");
+			}
+			
+			// update hsa
+			HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+			String current = hsa.calculateHSA();
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-update hsa: " + current);
+			try {
+				AES aes = new AES();
+				byte[] encryptedTextByte = aes.encrypt(current, aes.mSecretKey);
+				String encryptedText = new String(encryptedTextByte);
+				
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
+				// write the key back
+				if(!putString(FILE_KEY, encryptedText)){
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: Fail to write the key");
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		}
+		return true;
+	}
 	
 	private void setData(String productKey, int value){
 		
