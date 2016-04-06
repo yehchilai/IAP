@@ -408,6 +408,7 @@ public class IABBinder {
 		}
 	}
 	
+	// Check whether the storage file is compromised
 //	@SuppressLint("SdCardPath")
 	private boolean checkFile(){
 		String current;
@@ -444,11 +445,28 @@ public class IABBinder {
 		return isEqual;
 	}
 	
+	// put string data to the file
 	private boolean putString(String str, String str2){
 		// Get editor instance to put values in the XML file
 		SharedPreferences.Editor editor  = mSharedPreferences.edit();
 		// Put the Tmp key
 		editor.putString(str, str2);
 		return editor.commit();
+	}
+	
+	// get value from the file
+	public int getValue(String sku){
+		if(checkFile()){
+			int tmp = mSharedPreferences.getInt(sku, Integer.MIN_VALUE);
+			if(tmp != Integer.MIN_VALUE){
+				return tmp;
+			}else{
+				return Integer.MIN_VALUE;
+			}
+		}else{
+			Toast.makeText(mActivity, "The data is compromised!", Toast.LENGTH_LONG).show();
+			return Integer.MIN_VALUE;
+		}
+		
 	}
 }
