@@ -9,6 +9,8 @@ public class IABController{
 	private callbackEventHandler iabSetupCallback;
 	private callbackEventHandler iabPurchaseCallback;
 	private callbackEventHandler iabConsumeCallback;
+	private callbackEventHandler iabConsumeLocalCallback;
+	private callbackEventHandler iabGetLocalInfoCallback;
 	private callbackEventHandler iabInventoryCallback;
 
 	// Message from the jar library
@@ -95,6 +97,28 @@ public class IABController{
 		
 		if(instance.mIabHelperObj != null)
 			instance.mIabHelperObj.Call("consumeProduct", new object[1]{skus});
+	}
+
+	// consume local product
+	public void comsumeLocalProduct(string sku, int value, callbackEventHandler tmpIabConsumeCBFunc){
+		if(instance == null) return;
+		
+		instance.iabGetLocalInfoCallback = tmpIabConsumeCBFunc;
+		
+		if(instance.mIabHelperObj != null)
+			instance.mIabHelperObj.Call("consumeLoacalProduct", new object[2]{sku, value});
+	}
+
+	// get local product info
+	public int getLocalProduct(string sku, callbackEventHandler tmpIabConsumeCBFunc){
+
+		if(instance == null) return int.MaxValue;
+		
+		instance.iabConsumeLocalCallback = tmpIabConsumeCBFunc;
+		
+		if(instance.mIabHelperObj != null)
+			return instance.mIabHelperObj.Call<int>("getValue", new object[1]{sku});
+		return int.MaxValue;
 	}
 
 	public void msgReceiver(string message){

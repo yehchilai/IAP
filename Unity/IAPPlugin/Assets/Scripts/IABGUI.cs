@@ -14,6 +14,8 @@ public class IABGUI : MonoBehaviour {
 	public GUIStyle scrollerV;
 	public GUIStyle scrollerH;
 
+	private int coin;
+
 
 	void Start () {
 		string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmqNHL8jWtWPShIQVQEWVfj4MBejOpqT5yB6+g3u7uM99roiOISXmhS6Kaxfd6I2nWl05bSqCxzJxVlXOb/6QVHiBlbHvZkT3zmLRKD8k2sEqgRJJM/12GmdMXH/aoz4vcdq6Wp5KpOh3HgoPkE7eDlddKsXPuodOQOVcXh0GN2RQWRhC/sIE8hnED6m3fFLVHeJlBpSe8y3uGGpxrrlH6hcP4e66aMsMPn4zzPeEQA+Ir911oq0uB7n9O9mh1uPYcQMPfxktON6/cNX9UpEucKDxHpkmmaqwZuyGhZ+a4zBZXPFrUi1q+FhUn8KTpOkHgC/EEF52l0j2pZtHtuLNpwIDAQAB";
@@ -25,6 +27,8 @@ public class IABGUI : MonoBehaviour {
 				Debug.Log("### failed to initialize iab");
 			}
 		});
+
+
 
 //		iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
 //		iabCtrl.inventoryInfo(new string[]{"product_1_coin", "produt_2_coin", "coin"}, delegate(object[] resultArray) {
@@ -83,7 +87,7 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Purchase Button
-		if(GUI.Button(new Rect(350,350,256,256), "BUY")){
+		if(GUI.Button(new Rect(300,300,256,256), "BUY")){
 			string SKU = "coin";
 			string payload = "";
 			iabCtrl.purchase(SKU, 1001, payload, delegate(object[] resultArray) {
@@ -135,8 +139,26 @@ public class IABGUI : MonoBehaviour {
 //				}
 //			});
 		}
-	}
 
+		// Consume Button
+		if(GUI.Button(new Rect(10,300,256,256), "CONSUME Product")){
+
+			iabCtrl.comsumeLocalProduct("coin", 1, delegate(object[] ret2){
+				this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
+					print ("getLocalProduct");
+			});
+				if (false ==(bool)ret2[0])
+				{
+					Debug.Log("### failed to consume local product");
+				}else if(true == (bool)ret2[0]){
+					Debug.Log("### Consumption(Loacl Product) successful");
+				}
+			});
+		}
+		// Show Product coins
+		GUI.Label(new Rect(600, 300, 100, 20), "Coin: " + coin.ToString(), myStyle);
+	}
+		
 	void OnApplicationQuit(){
 		iabCtrl.dispose();
 	}
