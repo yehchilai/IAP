@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.apache.commons.codec.binary.*;
 
 public class AES {
 
@@ -21,7 +22,7 @@ public class AES {
 	
 	@SuppressLint("TrulyRandom")
 	public byte[] encrypt(String plainText, SecretKey key){
-		byte[] plainTextByte = plainText.getBytes();
+		byte[] plainTextByte =  plainText.getBytes();//Base64.decodeBase64(plainText);
 		byte[] encyptedByte = null;
 		try {
 			mCipher.init(Cipher.ENCRYPT_MODE, key);  // InvalidKeyException
@@ -37,6 +38,7 @@ public class AES {
 	}
 	
 	public byte[] decrypt(byte[] encryptedTextByte, SecretKey key){
+		
 		byte[] plainTextByte = null;
 		try {
 			mCipher.init(Cipher.DECRYPT_MODE, key); // InvalidKeyException

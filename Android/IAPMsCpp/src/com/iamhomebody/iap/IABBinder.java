@@ -15,7 +15,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
-import com.iamhomebody.iap.IABActivity;;
+import com.iamhomebody.iap.IABActivity;
+
+import org.apache.commons.codec.binary.Base64;
 
 public class IABBinder {
 	
@@ -32,6 +34,7 @@ public class IABBinder {
 	private static final String PREFS_NAME = "com.iamhomebody.iap";
 //	private static final String PREFS_NAME_KEY = "com.iamhomebody.iapKey";
 	private static final String FILE_KEY = "securityInfo";
+	private static final String TMP_KEY = "key";
 	
 	// Constructor and initialize the IAB functionality
 	@SuppressLint("CommitPrefEdits")
@@ -44,7 +47,7 @@ public class IABBinder {
 		if(info.equals("NO_KEY")){
 			try {
 				// Put the Tmp key
-				if(putString(FILE_KEY, "key")){
+				if(putString(FILE_KEY, TMP_KEY)){
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-encryptedText: Tmp key successful");
 				}else{
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
@@ -52,9 +55,10 @@ public class IABBinder {
 				
 				HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
 				String str = hsa.calculateHSA();
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-hsa: " + str);
 				AES aes = new AES();
 				byte[] encryptedTextByte = aes.encrypt(str, aes.mSecretKey);
-				String encryptedText = new String(encryptedTextByte);
+				String encryptedText = new String(Base64.encodeBase64(encryptedTextByte));
 				
 				// Put the key
 				if(putString(FILE_KEY, encryptedText)){
@@ -207,6 +211,8 @@ public class IABBinder {
 					        	
 					        	mIabHelper.consumeAsync(myInventory.getPurchase(sku), mConsumeFinishedListener);
 					        	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeProduct: " + sku);
+					        }else{
+					        	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeProduct-Do not Purchase: " + sku);
 					        }
 //							SkuDetails detail = myInventory.getSkuDetails(sku);
 //							if(detail != null){
@@ -330,7 +336,7 @@ public class IABBinder {
 			// Commit the put value
 			boolean isSaved = editor.commit();
 			// Show if the data is saved successfully
-			if(isSaved && putString(FILE_KEY, "key")){
+			if(isSaved && putString(FILE_KEY, TMP_KEY)){
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: " + sku + String.valueOf(tmp - value) +" , "+String.valueOf(value));
 			}else{
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: " + sku + " DOES NOT CONSUMED.");
@@ -343,7 +349,7 @@ public class IABBinder {
 			try {
 				AES aes = new AES();
 				byte[] encryptedTextByte = aes.encrypt(current, aes.mSecretKey);
-				String encryptedText = new String(encryptedTextByte);
+				String encryptedText = new String(Base64.encodeBase64(encryptedTextByte));
 				
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
 				// write the key back
@@ -372,7 +378,7 @@ public class IABBinder {
 		// Commit the put value
 		boolean isSaved = editor.commit();
 		// Show if the data is saved successfully
-		if(isSaved && putString(FILE_KEY, "key")){
+		if(isSaved && putString(FILE_KEY, TMP_KEY)){
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + String.valueOf(value) +" , "+String.valueOf(tmp));
 		}else{
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + " DOES NOT BE SEAVED.");
@@ -385,7 +391,7 @@ public class IABBinder {
 		try {
 			AES aes = new AES();
 			byte[] encryptedTextByte = aes.encrypt(current, aes.mSecretKey);
-			String encryptedText = new String(encryptedTextByte);
+			String encryptedText = new String(Base64.encodeBase64(encryptedTextByte));
 			
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
 			// write the key back
@@ -415,7 +421,7 @@ public class IABBinder {
 		String tmp = mSharedPreferences.getString(FILE_KEY, "NO_FILE");
 		boolean isEqual = false;
 		// put tmp key
-		if(putString(FILE_KEY, "key")){
+		if(putString(FILE_KEY, TMP_KEY)){
 			HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
 			current = hsa.calculateHSA();
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-current: " + current);
@@ -423,7 +429,8 @@ public class IABBinder {
 				AES aes = new AES();
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: " + tmp);
 				if(!tmp.equals("NO_FILE")){
-					byte[] decryptedTextByte = aes.decrypt(tmp.getBytes(), aes.mSecretKey);
+					byte[] decryptedTextByte = aes.decrypt(Base64.decodeBase64(tmp.getBytes()), aes.mSecretKey);
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-decryptedTextByte: ...");
 					String decryptedText = new String(decryptedTextByte);
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-decryptedText: " + decryptedText);
 					isEqual = current.equals(decryptedText);

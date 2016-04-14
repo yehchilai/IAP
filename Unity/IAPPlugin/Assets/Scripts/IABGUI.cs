@@ -113,7 +113,7 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Consume Button
-		if(GUI.Button(new Rect(10,300,256,256), "CONSUME")){
+		if(GUI.Button(new Rect(10,300,256,256), "CONSUME Test")){
 
 			string[] purchase = {"coin"};
 			iabCtrl.consumeProduct(purchase, 
@@ -141,7 +141,7 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Consume Button
-		if(GUI.Button(new Rect(10,300,256,256), "CONSUME Product")){
+		if(GUI.Button(new Rect(600,300,256,256), "CONSUME Product")){
 
 			iabCtrl.comsumeLocalProduct("coin", 1, delegate(object[] ret2){
 				this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
@@ -153,6 +153,13 @@ public class IABGUI : MonoBehaviour {
 				}else if(true == (bool)ret2[0]){
 					Debug.Log("### Consumption(Loacl Product) successful");
 				}
+			});
+		}
+
+		if(GUI.Button(new Rect(900,300,256,256), "SHOW Product")){
+			
+			this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
+				print ("getLocalProduct");
 			});
 		}
 		// Show Product coins
