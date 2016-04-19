@@ -28,7 +28,9 @@ public class IABGUI : MonoBehaviour {
 			}
 		});
 
-
+		this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
+			print ("getLocalProduct");
+		});
 
 //		iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
 //		iabCtrl.inventoryInfo(new string[]{"product_1_coin", "produt_2_coin", "coin"}, delegate(object[] resultArray) {
@@ -74,14 +76,14 @@ public class IABGUI : MonoBehaviour {
 		if(GUI.Button(new Rect(650,10,256,256), "Inventory Info")){
 			string[] skus = {"android.test.purchased", "product_1_coin", "produt_2_coin", "coin", "coins"};
 			iabCtrl.inventoryInfo(skus, delegate(object[] resultArray) {
-				if (false ==(bool)resultArray[0]){
-					Debug.Log("### inventory cancelled");
-				}else if (true ==(bool)resultArray[0]){
-					Debug.Log("### inventory successful");
-				}
-				else{
-					Debug.Log("### inventory error ?");
-				}
+//				if (false ==(bool)resultArray[0]){
+//					Debug.Log("### inventory cancelled");
+//				}else if (true ==(bool)resultArray[0]){
+//					Debug.Log("### inventory successful");
+//				}
+//				else{
+//					Debug.Log("### inventory error ?");
+//				}
 			});
 			
 		}
@@ -92,23 +94,23 @@ public class IABGUI : MonoBehaviour {
 			string payload = "";
 			iabCtrl.purchase(SKU, 10, 1001, payload, delegate(object[] resultArray) {
 				coin += 10;
-				if (false ==(bool)resultArray[0]){
-					Debug.Log("### purchase cancelled");
-				}else if (true ==(bool)resultArray[0]){
-					Debug.Log("### purchase successful");
-				}
-				else{
-					Debug.Log("### purchase error ?");
-//					string purchaseinfo =(string)resultArray[1];
-//					string signature =(string)resultArray[2];
-//					iabCtrl.consumeInapp(purchaseinfo, signature, 
-//					                         delegate(object[] ret2){
-//						if (false ==(bool)ret2[0])
-//						{
-//							Debug.Log("### failed to consume product");
-//						}
-//					});
-				}
+//				if (false ==(bool)resultArray[0]){
+//					Debug.Log("### purchase cancelled");
+//				}else if (true ==(bool)resultArray[0]){
+//					Debug.Log("### purchase successful");
+//				}
+//				else{
+//					Debug.Log("### purchase error ?");
+////					string purchaseinfo =(string)resultArray[1];
+////					string signature =(string)resultArray[2];
+////					iabCtrl.consumeInapp(purchaseinfo, signature, 
+////					                         delegate(object[] ret2){
+////						if (false ==(bool)ret2[0])
+////						{
+////							Debug.Log("### failed to consume product");
+////						}
+////					});
+//				}
 			});
 
 		}
@@ -119,13 +121,14 @@ public class IABGUI : MonoBehaviour {
 			string[] cunsume = {"coin"};
 			iabCtrl.consumeProduct(cunsume, 
 			                     delegate(object[] ret2){
-				if (false ==(bool)ret2[0])
-				{
-					Debug.Log("### failed to consume product");
-				}else if(true == (bool)ret2[0]){
-					Debug.Log("### Consumption successful");
-				}
+//				if (false ==(bool)ret2[0])
+//				{
+//					Debug.Log("### failed to consume product");
+//				}else if(true == (bool)ret2[0]){
+//					Debug.Log("### Consumption successful");
+//				}
 			});
+
 //			string purchase = "{\"packageName\":\"com.iamhomebody.MsProject\","+
 //				"\"orderId\":\"transactionId.android.test.purchased\","+
 //					"\"productId\":\"android.test.purchased\",\"developerPayload\":\"\",\"purchaseTime\":0,"+
@@ -148,12 +151,12 @@ public class IABGUI : MonoBehaviour {
 				this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
 					print ("getLocalProduct");
 			});
-				if (false ==(bool)ret2[0])
-				{
-					Debug.Log("### failed to consume local product");
-				}else if(true == (bool)ret2[0]){
-					Debug.Log("### Consumption(Loacl Product) successful");
-				}
+//				if (false ==(bool)ret2[0])
+//				{
+//					Debug.Log("### failed to consume local product");
+//				}else if(true == (bool)ret2[0]){
+//					Debug.Log("### Consumption(Loacl Product) successful");
+//				}
 			});
 		}
 

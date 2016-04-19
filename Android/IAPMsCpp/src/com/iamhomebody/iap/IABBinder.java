@@ -280,6 +280,7 @@ public class IABBinder {
 					
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
 					setData(info.getSku(), mAmount);
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PURCHASE_FINISHED");
 					mAmount = 0;
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
 				}
@@ -479,15 +480,15 @@ public class IABBinder {
 	// get value from the file
 	public int getValue(String sku){
 		if(checkFile()){
-			int tmp = mSharedPreferences.getInt(sku, Integer.MIN_VALUE);
-			if(tmp != Integer.MIN_VALUE){
+			int tmp = mSharedPreferences.getInt(sku, -1);
+			if(tmp != -1){
 				return tmp;
 			}else{
-				return Integer.MIN_VALUE;
+				return -1;
 			}
 		}else{
 			Toast.makeText(mActivity, "The data is compromised!", Toast.LENGTH_LONG).show();
-			return Integer.MIN_VALUE;
+			return -1;
 		}
 		
 	}

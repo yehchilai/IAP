@@ -124,6 +124,17 @@ public class IABController{
 	public void msgReceiver(string message){
 		if(instance == null) return;
 		mMessage += "\n### Unity nsgReceiver..." + message;
+		switch(message){
+		case "PURCHASE_FINISHED":
+			if(iabPurchaseCallback != null) iabPurchaseCallback(new object[]{});
+			break;
+		case "COMSUME_FINISHED":
+			if(iabConsumeCallback != null) iabConsumeCallback(new object[]{});
+			break;
+		case "COMSUME_LOCAL_FINISHED":
+			if(iabConsumeLocalCallback != null) iabConsumeLocalCallback(new object[]{});
+			break;
+		}
 //		Debug.Log("### Unity nsgReceiver...");
 //		Dictionary<string,object> json = MiniJSON.Json.Deserialize(message) as Dictionary<string,object>;
 //		if(json.ContainsKey("code") == true){
@@ -157,7 +168,7 @@ public class IABController{
 //			}
 //		}
 	}
-
+	 
 	public void codeCase(Dictionary<string,object> json, int code, callbackEventHandler callback){
 
 		if(json.ContainsKey("ret") == true){
@@ -186,4 +197,6 @@ public class IABController{
 			}
 		}
 	}
+
+
 }
