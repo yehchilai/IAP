@@ -14,6 +14,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Toast;
+//import org.json.simple.JSONObject;
 
 import com.iamhomebody.iap.IABActivity;
 
@@ -26,7 +27,8 @@ public class IABBinder {
 	private IabHelper mIabHelper;
 	private String mEventHandler;
 	private Inventory myInventory;
-	private String[] skus = {"product_1_coin", "produt_2_coin", "coin"};
+	private String[] skus = {"product_1_coin", "produt_2_coin", "coin", "coins"};
+	private int mAmount = 0;
 	
 	// Data Store
 	SharedPreferences mSharedPreferences;
@@ -139,6 +141,9 @@ public class IABBinder {
 		        }else if (inventory.hasPurchase("coin")) {
 		        	
 		        	mIabHelper.consumeAsync(inventory.getPurchase("coin"), mConsumeFinishedListener);
+		        }else if (inventory.hasPurchase("coins")) {
+		        	
+		        	mIabHelper.consumeAsync(inventory.getPurchase("coins"), mConsumeFinishedListener);
 		        }
 	    	}
 	    }
@@ -236,7 +241,8 @@ public class IABBinder {
 	
 	
 	// Purchase products
-	public void purchase(String SKU, String requestCode, String payload){
+	public void purchase(String SKU,int amount, String requestCode, String payload){
+		mAmount = amount;
 		int code = Integer.parseInt(requestCode);
 		if(mIabHelper != null && checkFile()){
 			mIabHelper.launchPurchaseFlow(mActivity, SKU, code, mPurchaseFinishedListener, payload);
@@ -254,7 +260,8 @@ public class IABBinder {
 			// TODO Auto-generated method stub
 			if(result.isFailure()){
 				// sent a message to Unity gameObject with JSON format
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\"false\",\"desc\":\"\",\"sign\":\"\"}");
+//				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\"false\",\"desc\":\"\",\"sign\":\"\"}");
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA onIabPurchaseFinished: result.isFailure() = TURE");
 				return;
 			}
 				
@@ -266,11 +273,19 @@ public class IABBinder {
 				if(info != null){
 					resultJSON = info.getOriginalJson().replace('\"', '\'');
 					resultSignature = info.getSignature();
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getSku: " + info.getSku());	
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getSku: " + info.getSku());
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPackageName: " + info.getPackageName());
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPurchaseState: " + info.getPurchaseState());
+					
+					
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
+					setData(info.getSku(), mAmount);
+					mAmount = 0;
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
 				}
 				
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
-				setData(skus[0], 1);
+				
+				
 			}
 		}
 	};

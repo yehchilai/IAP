@@ -68,14 +68,14 @@ public class IABController{
 			instance.mIabHelperObj.Call("inventoryInfo", new object[1]{skus});
 	}
 
-	public void purchase(string SKU, int requestCode, string payload, callbackEventHandler tmpIabPurchaseCBFunc){
+	public void purchase(string SKU, int amount, int requestCode, string payload, callbackEventHandler tmpIabPurchaseCBFunc){
 
 		if(instance == null) return;
 
 		instance.iabPurchaseCallback = tmpIabPurchaseCBFunc;
 
 		if(instance.mIabHelperObj != null)
-			instance.mIabHelperObj.Call("purchase", new object[3]{SKU, requestCode.ToString(), payload});
+			instance.mIabHelperObj.Call("purchase", new object[4]{SKU, amount, requestCode.ToString(), payload});
 	}
 
 	public void consumeInapp(string purchaseJSON, string signature, callbackEventHandler tmpIabConsumeCBFunc){
@@ -124,7 +124,7 @@ public class IABController{
 	public void msgReceiver(string message){
 		if(instance == null) return;
 		mMessage += "\n### Unity nsgReceiver..." + message;
-		Debug.Log("### Unity nsgReceiver...");
+//		Debug.Log("### Unity nsgReceiver...");
 //		Dictionary<string,object> json = MiniJSON.Json.Deserialize(message) as Dictionary<string,object>;
 //		if(json.ContainsKey("code") == true){
 //			int value = 0;

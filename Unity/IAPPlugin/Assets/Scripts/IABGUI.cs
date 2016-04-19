@@ -55,7 +55,7 @@ public class IABGUI : MonoBehaviour {
 
 		// Initial Button
 		if(GUI.Button(new Rect(10,10,256,256), "INIT")){
-			iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
+			iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin", "coins"});
 //			iabCtrl.queryInventory();
 //			string PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmqNHL8jWtWPShIQVQEWVfj4MBejOpqT5yB6+g3u7uM99roiOISXmhS6Kaxfd6I2nWl05bSqCxzJxVlXOb/6QVHiBlbHvZkT3zmLRKD8k2sEqgRJJM/12GmdMXH/aoz4vcdq6Wp5KpOh3HgoPkE7eDlddKsXPuodOQOVcXh0GN2RQWRhC/sIE8hnED6m3fFLVHeJlBpSe8y3uGGpxrrlH6hcP4e66aMsMPn4zzPeEQA+Ir911oq0uB7n9O9mh1uPYcQMPfxktON6/cNX9UpEucKDxHpkmmaqwZuyGhZ+a4zBZXPFrUi1q+FhUn8KTpOkHgC/EEF52l0j2pZtHtuLNpwIDAQAB";
 //				iabCtrl.init(PUBLIC_KEY, delegate (object[] ret){
@@ -71,8 +71,8 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Inventory Button
-		if(GUI.Button(new Rect(600,10,256,256), "Inventory Info")){
-			string[] skus = {"android.test.purchased", "product_1_coin", "produt_2_coin", "coin"};
+		if(GUI.Button(new Rect(650,10,256,256), "Inventory Info")){
+			string[] skus = {"android.test.purchased", "product_1_coin", "produt_2_coin", "coin", "coins"};
 			iabCtrl.inventoryInfo(skus, delegate(object[] resultArray) {
 				if (false ==(bool)resultArray[0]){
 					Debug.Log("### inventory cancelled");
@@ -87,10 +87,11 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Purchase Button
-		if(GUI.Button(new Rect(300,300,256,256), "BUY")){
+		if(GUI.Button(new Rect(300,330,256,256), "BUY")){
 			string SKU = "coin";
 			string payload = "";
-			iabCtrl.purchase(SKU, 1001, payload, delegate(object[] resultArray) {
+			iabCtrl.purchase(SKU, 10, 1001, payload, delegate(object[] resultArray) {
+				coin += 10;
 				if (false ==(bool)resultArray[0]){
 					Debug.Log("### purchase cancelled");
 				}else if (true ==(bool)resultArray[0]){
@@ -113,10 +114,10 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Consume Button
-		if(GUI.Button(new Rect(10,300,256,256), "CONSUME Test")){
+		if(GUI.Button(new Rect(10,330,256,256), "CONSUME Test")){
 
-			string[] purchase = {"coin"};
-			iabCtrl.consumeProduct(purchase, 
+			string[] cunsume = {"coin"};
+			iabCtrl.consumeProduct(cunsume, 
 			                     delegate(object[] ret2){
 				if (false ==(bool)ret2[0])
 				{
@@ -141,7 +142,7 @@ public class IABGUI : MonoBehaviour {
 		}
 
 		// Consume Button
-		if(GUI.Button(new Rect(600,300,256,256), "CONSUME Product")){
+		if(GUI.Button(new Rect(600,330,256,256), "CONSUME Product")){
 
 			iabCtrl.comsumeLocalProduct("coin", 1, delegate(object[] ret2){
 				this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
@@ -156,14 +157,14 @@ public class IABGUI : MonoBehaviour {
 			});
 		}
 
-		if(GUI.Button(new Rect(900,300,256,256), "SHOW Product")){
+		if(GUI.Button(new Rect(900,330,256,256), "SHOW Product")){
 			
 			this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
 				print ("getLocalProduct");
 			});
 		}
 		// Show Product coins
-		GUI.Label(new Rect(600, 300, 100, 20), "Coin: " + coin.ToString(), myStyle);
+		GUI.Label(new Rect(630, 300, 100, 20), "Coin: " + coin.ToString(), myStyle);
 	}
 		
 	void OnApplicationQuit(){
