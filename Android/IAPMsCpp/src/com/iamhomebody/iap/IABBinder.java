@@ -284,9 +284,6 @@ public class IABBinder {
 					mAmount = 0;
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
 				}
-				
-				
-				
 			}
 		}
 	};
@@ -462,6 +459,7 @@ public class IABBinder {
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
 			} 
 		}
 		
