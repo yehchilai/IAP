@@ -82,7 +82,7 @@ public class IABBinder {
 		
 		mIabHelper = new IabHelper(mActivity, base64EncodedPublicKey);
 		
-		mIabHelper.enableDebugLogging(true); // Turn to false when the app is published
+		mIabHelper.enableDebugLogging(true); //TODO Turn to false when the app is published
 		
 		mIabHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 			
@@ -229,9 +229,7 @@ public class IABBinder {
 //								UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
 //							}
 						}
-						
 					}
-					
 				});
 				
 			}else{
@@ -276,8 +274,6 @@ public class IABBinder {
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getSku: " + info.getSku());
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPackageName: " + info.getPackageName());
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPurchaseState: " + info.getPurchaseState());
-					
-					
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
 					setData(info.getSku(), mAmount);
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PURCHASE_FINISHED");
@@ -328,7 +324,7 @@ public class IABBinder {
 	};
 	
 	// consume purchased and saved product
-	public boolean consumeLoacalProduct(String sku, int value){
+	public boolean consumeLocalProduct(String sku, int value){
 		if(!checkFile()){
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeLoacalProduct: The data is compromised!");
 			return false;
@@ -374,6 +370,7 @@ public class IABBinder {
 				e.printStackTrace();
 			} 
 		}
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "COMSUME_LOCAL_FINISHED");
 		return true;
 	}
 	
@@ -453,16 +450,15 @@ public class IABBinder {
 					}
 				}else{
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-info: The app is compromised- " + tmp);
-					Toast.makeText(mActivity, "The data is compromised!", Toast.LENGTH_LONG).show();
+					toastMsg("This app is compromised!");
 					return false;
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				Toast.makeText(mActivity, e.toString(), Toast.LENGTH_LONG).show();
+				toastMsg(e.toString());
 			} 
 		}
-		
 		return isEqual;
 	}
 	
@@ -485,9 +481,20 @@ public class IABBinder {
 				return -1;
 			}
 		}else{
-			Toast.makeText(mActivity, "The data is compromised!", Toast.LENGTH_LONG).show();
+			toastMsg("This app is compromised!");
 			return -1;
 		}
-		
+	}
+	
+	private void toastMsg(final String str){
+		UnityPlayer.currentActivity.runOnUiThread(new Runnable(){
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				Toast.makeText(mActivity, str, Toast.LENGTH_LONG).show();
+			}
+			
+		});
 	}
 }

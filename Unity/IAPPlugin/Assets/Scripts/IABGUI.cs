@@ -28,7 +28,7 @@ public class IABGUI : MonoBehaviour {
 			}
 		});
 
-		this.coin = iabCtrl.getLocalProduct("coin10" ,delegate(object[] ret3) {
+		this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
 			print ("getLocalProduct");
 		});
 
@@ -74,7 +74,7 @@ public class IABGUI : MonoBehaviour {
 
 		// Inventory Button
 		if(GUI.Button(new Rect(650,10,256,256), "Inventory Info")){
-			string[] skus = {"android.test.purchased", "product_1_coin", "produt_2_coin", "coin", "coin10"};
+			string[] skus = {"android.test.purchased", "product_1_coin", "produt_2_coin", "coin", "coin9"};
 			iabCtrl.inventoryInfo(skus, delegate(object[] resultArray) {
 //				if (false ==(bool)resultArray[0]){
 //					Debug.Log("### inventory cancelled");
@@ -90,10 +90,10 @@ public class IABGUI : MonoBehaviour {
 
 		// Purchase Button
 		if(GUI.Button(new Rect(300,330,256,256), "BUY")){
-			string SKU = "coin10";
+			string SKU = "coin9";
 			string payload = "";
 			iabCtrl.purchase(SKU, 10, 1001, payload, delegate(object[] resultArray) {
-				this.coin = iabCtrl.getLocalProduct("coin10" ,delegate(object[] ret3) {
+				this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
 					print ("getLocalProduct");
 				});
 //				if (false ==(bool)resultArray[0]){
@@ -120,7 +120,7 @@ public class IABGUI : MonoBehaviour {
 		// Consume Button
 		if(GUI.Button(new Rect(10,330,256,256), "CONSUME Test")){
 
-			string[] cunsume = {"coin10"};
+			string[] cunsume = {"coin9"};
 			iabCtrl.consumeProduct(cunsume, 
 			                     delegate(object[] ret2){
 //				if (false ==(bool)ret2[0])
@@ -149,9 +149,9 @@ public class IABGUI : MonoBehaviour {
 		// Consume Button
 		if(GUI.Button(new Rect(600,330,256,256), "CONSUME Product")){
 
-			iabCtrl.comsumeLocalProduct("coin10", 1, delegate(object[] ret2){
-				this.coin = iabCtrl.getLocalProduct("coin" ,delegate(object[] ret3) {
-					print ("getLocalProduct");
+			iabCtrl.comsumeLocalProduct("coin9", 1, delegate(object[] ret2){
+				this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
+					print ("Show getLocalProduct after comsume local product.");
 			});
 //				if (false ==(bool)ret2[0])
 //				{
@@ -164,7 +164,7 @@ public class IABGUI : MonoBehaviour {
 
 		if(GUI.Button(new Rect(900,330,256,256), "SHOW Product")){
 			
-			this.coin = iabCtrl.getLocalProduct("coin10" ,delegate(object[] ret3) {
+			this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
 				print ("getLocalProduct");
 			});
 		}

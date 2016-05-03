@@ -103,10 +103,10 @@ public class IABController{
 	public void comsumeLocalProduct(string sku, int value, callbackEventHandler tmpIabConsumeCBFunc){
 		if(instance == null) return;
 		
-		instance.iabGetLocalInfoCallback = tmpIabConsumeCBFunc;
+		instance.iabConsumeLocalCallback = tmpIabConsumeCBFunc;
 		
 		if(instance.mIabHelperObj != null)
-			instance.mIabHelperObj.Call("consumeLoacalProduct", new object[2]{sku, value});
+			instance.mIabHelperObj.Call<bool>("consumeLocalProduct", new object[2]{sku, value});
 	}
 
 	// get local product info
