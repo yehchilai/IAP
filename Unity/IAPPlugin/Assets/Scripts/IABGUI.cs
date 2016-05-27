@@ -14,6 +14,8 @@ public class IABGUI : MonoBehaviour {
 	public GUIStyle scrollerV;
 	public GUIStyle scrollerH;
 
+	public TextAsset textAsset;
+
 	private int coin;
 
 
@@ -31,6 +33,8 @@ public class IABGUI : MonoBehaviour {
 		this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
 			print ("getLocalProduct");
 		});
+//		https();
+
 
 //		iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
 //		iabCtrl.inventoryInfo(new string[]{"product_1_coin", "produt_2_coin", "coin"}, delegate(object[] resultArray) {
@@ -168,6 +172,18 @@ public class IABGUI : MonoBehaviour {
 				print ("getLocalProduct");
 			});
 		}
+
+		// Inventory Button
+		if(GUI.Button(new Rect(950,10,256,256), "WEB REQUEST")){
+			https();
+//			iabCtrl.mMessage += "\nWEB REQUEST Start...";
+////			StartCoroutine(webRequest());
+//			string requestUrl = "https://192.168.58.1:5000/verification?username=mark&hash=alsjfqo240fqhefoiwjdfja";
+//			WWW download = new WWW(requestUrl);
+//			StartCoroutine(WaitForRequest(download));
+//			iabCtrl.mMessage += "\nWEB REQUEST End...";
+		}
+
 		// Show Product coins
 		GUI.Label(new Rect(630, 300, 100, 20), "Coin: " + coin.ToString(), myStyle);
 	}
@@ -179,7 +195,27 @@ public class IABGUI : MonoBehaviour {
 	public void msgReceiver(string message){
 		iabCtrl.msgReceiver(message);
 	}
-	
+
+	IEnumerator WaitForRequest(WWW www)
+	{
+		yield return www;
+		// check for errors
+		if (www.error == null)
+		{
+			iabCtrl.mMessage += "\n"+www.text;
+		} else {
+			iabCtrl.mMessage += "\n"+www.error;
+		}    
+	}    
+
+	public void https(){
+		TextAsset t = Resources.Load("serverkey") as TextAsset;
+		iabCtrl.mMessage += "\nServerKey: "+t.text;
+//		string cert = @"";
+//		AndroidJavaClass clsJavaSSLHelper = new AndroidJavaClass("com.iamhomebody.iap.JavaSSLHelper");
+//		byte[] certBytes = System.Text.Encoding.ASCII.GetBytes(cert);
+//		clsJavaSSLHelper.CallStatic("trust", certBytes); //here we call the trust method from above
+	}
 
 	#endif
 }

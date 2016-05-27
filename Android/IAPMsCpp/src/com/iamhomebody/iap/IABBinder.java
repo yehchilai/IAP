@@ -497,4 +497,11 @@ public class IABBinder {
 			
 		});
 	}
+	
+	// RSA
+	public void rsa(){
+		Rsa rsa = new Rsa();
+//		byte[] crypted = rsa.encrypt(plainText, rsa.getPublicKey(getAssets().open("public_key.der")));
+//		String cryptedStr = new String(Base64.encodeBase64(crypted));
+	}
 }
