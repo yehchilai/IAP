@@ -175,13 +175,22 @@ public class IABGUI : MonoBehaviour {
 
 		// Inventory Button
 		if(GUI.Button(new Rect(950,10,256,256), "WEB REQUEST")){
-			https();
-//			iabCtrl.mMessage += "\nWEB REQUEST Start...";
-////			StartCoroutine(webRequest());
-//			string requestUrl = "https://192.168.58.1:5000/verification?username=mark&hash=alsjfqo240fqhefoiwjdfja";
-//			WWW download = new WWW(requestUrl);
-//			StartCoroutine(WaitForRequest(download));
-//			iabCtrl.mMessage += "\nWEB REQUEST End...";
+			string rsaStr = iabCtrl.rsaVerify(delegate(object[] ret) {
+				iabCtrl.mMessage += "\nRAS Finished.";
+			});
+
+//			https();
+			if(rsaStr != null){
+				iabCtrl.mMessage += "\nRSA-Unity: "+rsaStr;
+				// build URL
+				string requestUrl = "http://192.168.58.1:5000/verification?username=mark&hash="+WWW.EscapeURL(rsaStr);
+				// set www request
+				WWW request = new WWW(requestUrl);
+				// start coroutine to wait the website return
+				StartCoroutine(WaitForRequest(request));
+			}else{
+				iabCtrl.mMessage += "\nRSA-Unity: null";
+			}
 		}
 
 		// Show Product coins
@@ -203,6 +212,24 @@ public class IABGUI : MonoBehaviour {
 		if (www.error == null)
 		{
 			iabCtrl.mMessage += "\n"+www.text;
+			// do something when recieving the return message
+			Dictionary<string,object> json = MiniJSON.Json.Deserialize(www.text) as Dictionary<string,object>;
+			if(json.ContainsKey("status")){
+				bool status = false;
+				iabCtrl.mMessage += "\n"+json["status"];
+				if(bool.TryParse((string)json["status"],out status)){
+					if(status){
+						iabCtrl.mMessage += "\nStatus = True";
+					}else{
+						iabCtrl.mMessage += "\nStatus = False";
+					}
+				}else{
+					iabCtrl.mMessage += "\nCannot Parse status";
+				}
+			}else{
+				iabCtrl.mMessage += "\nResult does not contain status";
+			}
+
 		} else {
 			iabCtrl.mMessage += "\n"+www.error;
 		}    

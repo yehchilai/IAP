@@ -12,6 +12,7 @@ public class IABController{
 	private callbackEventHandler iabConsumeLocalCallback;
 	private callbackEventHandler iabGetLocalInfoCallback;
 	private callbackEventHandler iabInventoryCallback;
+	private callbackEventHandler iabWebVerificationCallback;
 
 	// Message from the jar library
 	public string mMessage = "Message from the jar library\n";
@@ -121,6 +122,18 @@ public class IABController{
 		return int.MaxValue;
 	}
 
+	// get local product info
+	public string rsaVerify(callbackEventHandler tmpIabCBFunc){
+		
+		if(instance == null) return null;
+		
+		instance.iabWebVerificationCallback = tmpIabCBFunc;
+		
+		if(instance.mIabHelperObj != null)
+			return instance.mIabHelperObj.Call<string>("rsa");
+		return null;
+	}
+
 	public void msgReceiver(string message){
 		if(instance == null) return;
 		mMessage += "\n### Unity nsgReceiver..." + message;
@@ -133,6 +146,9 @@ public class IABController{
 			break;
 		case "COMSUME_LOCAL_FINISHED":
 			if(iabConsumeLocalCallback != null) iabConsumeLocalCallback(new object[]{});
+			break;
+		case "WEB_VERIFICATION":
+			if(iabWebVerificationCallback != null) iabWebVerificationCallback(new object[]{});
 			break;
 		}
 //		Debug.Log("### Unity nsgReceiver...");

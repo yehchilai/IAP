@@ -1,6 +1,7 @@
 package com.iamhomebody.iap;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.iamhomebody.ms.*;
@@ -13,8 +14,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.widget.Toast;
 //import org.json.simple.JSONObject;
+
+
+
 
 import com.iamhomebody.iap.IABActivity;
 
@@ -499,9 +504,40 @@ public class IABBinder {
 	}
 	
 	// RSA
-	public void rsa(){
-		Rsa rsa = new Rsa();
-//		byte[] crypted = rsa.encrypt(plainText, rsa.getPublicKey(getAssets().open("public_key.der")));
-//		String cryptedStr = new String(Base64.encodeBase64(crypted));
+	public String rsa() throws IOException{
+		String current;
+		String cryptedStr = null;
+		String tmp = mSharedPreferences.getString(FILE_KEY, "NO_FILE");
+		boolean isEqual = false;
+		// put tmp key
+		if(putString(FILE_KEY, TMP_KEY)){
+			HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+			current = hsa.calculateHSA();
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## rsa-current: " + current);
+			Log.d("HASH", current);
+			try {
+				Rsa rsa = new Rsa();
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## rsa-info: " + tmp);
+				if(!tmp.equals("NO_FILE")){
+					byte[] crypted = rsa.encrypt(current, rsa.getPublicKey(mActivity.getAssets().open("public_key.der")));
+					cryptedStr = new String(Base64.encodeBase64(crypted));
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## rsa-Android: "+cryptedStr);
+					// write the key back
+					if(!putString(FILE_KEY, tmp)){
+						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## rsa: Fail to write the key");
+					}
+				}else{
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## rsa-info: The app is compromised- " + tmp);
+					toastMsg("This app is compromised!");
+					return cryptedStr;
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				toastMsg(e.toString());
+			} 
+		}
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "WEB_VERIFICATION");
+		return cryptedStr;
 	}
 }

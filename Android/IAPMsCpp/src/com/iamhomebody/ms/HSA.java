@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import org.apache.commons.codec.binary.Base64;
+
 public class HSA {
 private String mXmlPath;
 	
@@ -47,6 +49,7 @@ private String mXmlPath;
 		byte[] digest = md.digest();
 //		String result = new String(Hex.encodeHex(digest));
 //		return result;
-		return new String(digest);
+		return new String(Base64.encodeBase64(digest));
+//		return new String(digest);
 	}
 }
