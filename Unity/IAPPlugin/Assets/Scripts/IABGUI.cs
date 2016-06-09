@@ -14,6 +14,8 @@ public class IABGUI : MonoBehaviour {
 	public GUIStyle scrollerV;
 	public GUIStyle scrollerH;
 
+	public TextAsset textAsset;
+
 	private int coin;
 
 
@@ -31,6 +33,8 @@ public class IABGUI : MonoBehaviour {
 		this.coin = iabCtrl.getLocalProduct("coin9" ,delegate(object[] ret3) {
 			print ("getLocalProduct");
 		});
+//		https();
+
 
 //		iabCtrl.queryInventory(new string[]{"product_1_coin", "produt_2_coin", "coin"});
 //		iabCtrl.inventoryInfo(new string[]{"product_1_coin", "produt_2_coin", "coin"}, delegate(object[] resultArray) {
@@ -168,6 +172,35 @@ public class IABGUI : MonoBehaviour {
 				print ("getLocalProduct");
 			});
 		}
+
+		// WEB Trust Button
+		if(GUI.Button(new Rect(950,138,256,128), "WEB TRUST")){
+			iabCtrl.httpsTrust(delegate(object[] ret) {
+				iabCtrl.mMessage += "\nhttpsTrust Finished.";
+			});
+		}
+
+
+		// WEB Button
+		if(GUI.Button(new Rect(950,10,256,128), "WEB REQUEST")){
+			string rsaStr = iabCtrl.rsaVerify(delegate(object[] ret) {
+				iabCtrl.mMessage += "\nRAS Finished.";
+			});
+
+//			https();
+			if(rsaStr != null){
+				iabCtrl.mMessage += "\nRSA-Unity: "+rsaStr;
+				// build URL
+				string requestUrl = "https://192.168.58.1:5000/verification?username=mark&hash="+WWW.EscapeURL(rsaStr);
+				// set www request
+				WWW request = new WWW(requestUrl);
+				// start coroutine to wait the website return
+				StartCoroutine(WaitForRequest(request));
+			}else{
+				iabCtrl.mMessage += "\nRSA-Unity: null";
+			}
+		}
+
 		// Show Product coins
 		GUI.Label(new Rect(630, 300, 100, 20), "Coin: " + coin.ToString(), myStyle);
 	}
@@ -179,7 +212,45 @@ public class IABGUI : MonoBehaviour {
 	public void msgReceiver(string message){
 		iabCtrl.msgReceiver(message);
 	}
-	
+
+	IEnumerator WaitForRequest(WWW www)
+	{
+		yield return www;
+		// check for errors
+		if (www.error == null)
+		{
+			iabCtrl.mMessage += "\n Unity-Response: "+www.text;
+			// do something when recieving the return message
+//			Dictionary<string,object> json = MiniJSON.Json.Deserialize(www.text) as Dictionary<string,object>;
+//			if(json.ContainsKey("status")){
+//				bool status = false;
+//				iabCtrl.mMessage += "\n"+json["status"];
+//				if(bool.TryParse((string)json["status"],out status)){
+//					if(status){
+//						iabCtrl.mMessage += "\nStatus = True";
+//					}else{
+//						iabCtrl.mMessage += "\nStatus = False";
+//					}
+//				}else{
+//					iabCtrl.mMessage += "\nCannot Parse status";
+//				}
+//			}else{
+//				iabCtrl.mMessage += "\nResult does not contain status";
+//			}
+
+		} else {
+			iabCtrl.mMessage += "\n Unity-Error: "+www.error;
+		}    
+	}    
+
+	public void https(){
+		TextAsset t = Resources.Load("serverkey") as TextAsset;
+		iabCtrl.mMessage += "\nServerKey: "+t.text;
+//		string cert = @"";
+//		AndroidJavaClass clsJavaSSLHelper = new AndroidJavaClass("com.iamhomebody.iap.JavaSSLHelper");
+//		byte[] certBytes = System.Text.Encoding.ASCII.GetBytes(cert);
+//		clsJavaSSLHelper.CallStatic("trust", certBytes); //here we call the trust method from above
+	}
 
 	#endif
 }
