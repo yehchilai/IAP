@@ -22,7 +22,6 @@ private String mXmlPath;
 		try {
 			MessageDigest md = MessageDigest.getInstance("SHA");
 			digest = getDigest(new FileInputStream(new File(mXmlPath)), md, 2048);
-//			System.out.println("SHA Digest:" + digest);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -47,9 +46,6 @@ private String mXmlPath;
 			e.printStackTrace();
 		}
 		byte[] digest = md.digest();
-//		String result = new String(Hex.encodeHex(digest));
-//		return result;
 		return new String(Base64.encodeBase64(digest));
-//		return new String(digest);
 	}
 }

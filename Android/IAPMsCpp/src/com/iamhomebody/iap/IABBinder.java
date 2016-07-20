@@ -20,11 +20,6 @@ import android.util.Log;
 import android.widget.Toast;
 //import org.json.simple.JSONObject;
 
-
-
-
-
-
 import com.iamhomebody.iap.IABActivity;
 
 import org.apache.commons.codec.binary.Base64;
@@ -63,7 +58,6 @@ public class IABBinder {
 				}else{
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
 				}
-				
 				HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
 				String str = hsa.calculateHSA();
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-hsa: " + str);
@@ -101,14 +95,15 @@ public class IABBinder {
 				if(!result.isSuccess()){
 					// sent a message to Unity gameObject with JSON format
 					// UnitySendMessage(GameObject Name, Function Name, Agrs)
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_FAIL");
 					dispose();
 					return;
 				}
 				
 				// sent a message to Unity gameObject with JSON format
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
-				
+//				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_SUCCESS");
 				// get inventory - check the consumable items
 //				mIabHelper.queryInventoryAsync(mGotInventoryListener);
 
@@ -131,32 +126,34 @@ public class IABBinder {
 		});
 	}
 
-	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
-
-	    public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
-	    	
-	    	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
-	    	myInventory = inventory;
-	    	if (result.isFailure()){
-	    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
-	    	}else{
-	    		
-	    		if (inventory.hasPurchase("product_1_coin")) {
-		        	
-		        	mIabHelper.consumeAsync(inventory.getPurchase("product_1_coin"), mConsumeFinishedListener);
-		        }else if (inventory.hasPurchase("produt_2_coin")) {
-		        	
-		        	mIabHelper.consumeAsync(inventory.getPurchase("produt_2_coin"), mConsumeFinishedListener);
-		        }else if (inventory.hasPurchase("coin")) {
-		        	
-		        	mIabHelper.consumeAsync(inventory.getPurchase("coin"), mConsumeFinishedListener);
-		        }else if (inventory.hasPurchase("coins")) {
-		        	
-		        	mIabHelper.consumeAsync(inventory.getPurchase("coins"), mConsumeFinishedListener);
-		        }
-	    	}
-	    }
-	};
+//	IabHelper.QueryInventoryFinishedListener mGotInventoryListener = new IabHelper.QueryInventoryFinishedListener() {
+//
+//	    public void onQueryInventoryFinished(IabResult result, Inventory inventory) {
+//	    	
+//	    	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
+//	    	myInventory = inventory;
+//	    	if (result.isFailure()){
+////	    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory initialize fail : ");
+////	    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_FAIL");
+//	    	}else{
+//	    		
+////	    		if (inventory.hasPurchase("product_1_coin")) {
+////		        	
+////		        	mIabHelper.consumeAsync(inventory.getPurchase("product_1_coin"), mConsumeFinishedListener);
+////		        }else if (inventory.hasPurchase("produt_2_coin")) {
+////		        	
+////		        	mIabHelper.consumeAsync(inventory.getPurchase("produt_2_coin"), mConsumeFinishedListener);
+////		        }else if (inventory.hasPurchase("coin")) {
+////		        	
+////		        	mIabHelper.consumeAsync(inventory.getPurchase("coin"), mConsumeFinishedListener);
+////		        }else if (inventory.hasPurchase("coins")) {
+////		        	
+////		        	mIabHelper.consumeAsync(inventory.getPurchase("coins"), mConsumeFinishedListener);
+////		        }
+////	    		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_SUCCESS");
+//	    	}
+//	    }
+//	};
 	
 	public void dispose() {
 		// TODO Auto-generated method stub
@@ -182,6 +179,7 @@ public class IABBinder {
 						// TODO Auto-generated method stub
 						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
 				    	myInventory = inv;
+				    	
 					}
 				});
 			}
