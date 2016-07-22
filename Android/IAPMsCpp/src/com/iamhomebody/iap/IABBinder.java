@@ -42,6 +42,11 @@ public class IABBinder {
 	private static final String FILE_KEY = "securityInfo";
 	private static final String TMP_KEY = "key";
 	
+	public IABBinder(String strEventHandler){
+		mActivity = UnityPlayer.currentActivity;
+		mEventHandler = strEventHandler;
+		mSharedPreferences = mActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+	}
 	// Constructor and initialize the IAB functionality
 	@SuppressLint("CommitPrefEdits")
 	public IABBinder(String base64EncodedPublicKey, String strEventHandler){
@@ -85,7 +90,7 @@ public class IABBinder {
 		
 		mIabHelper = new IabHelper(mActivity, base64EncodedPublicKey);
 		
-		mIabHelper.enableDebugLogging(true); //TODO Turn to false when the app is published
+		mIabHelper.enableDebugLogging(false); //TODO Turn to false when the app is published
 		
 		mIabHelper.startSetup(new IabHelper.OnIabSetupFinishedListener() {
 			
@@ -96,14 +101,14 @@ public class IABBinder {
 					// sent a message to Unity gameObject with JSON format
 					// UnitySendMessage(GameObject Name, Function Name, Agrs)
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_FAIL");
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"INITIALIZE_FAIL\"}");
 					dispose();
 					return;
 				}
 				
 				// sent a message to Unity gameObject with JSON format
 //				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"1\",\"ret\":\"false\",\"desc\":\""+result.toString()+"\"}");
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "INITIALIZE_SUCCESS");
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"INITIALIZE_SUCCESS\"}");
 				// get inventory - check the consumable items
 //				mIabHelper.queryInventoryAsync(mGotInventoryListener);
 
@@ -166,7 +171,7 @@ public class IABBinder {
 	
 	// query inventory
 	public void queryInventory(final String[] skus){
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Query Inventory !!! ");
+//		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Query Inventory !!! ");
 		UnityPlayer.currentActivity.runOnUiThread(new Runnable(){
 
 			@Override
@@ -179,7 +184,21 @@ public class IABBinder {
 						// TODO Auto-generated method stub
 						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
 				    	myInventory = inv;
-				    	
+				    	if(myInventory != null){
+							for(String sku:skus){
+								SkuDetails detail = myInventory.getSkuDetails(sku);
+								if(detail != null){
+									// send product details to Unity
+									String hasPurchase = "\"hasPurchase\":"+String.valueOf(myInventory.hasPurchase(sku));
+									UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"PRODUCT_INFO\",\"productInfo\":"+ detail.toString().substring(11) +","+hasPurchase +"}");
+								}else{
+									UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
+								}
+							}
+							UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"QUERY_INVENTORY_FINISHED\"}");
+						}else{
+							UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
+						}
 					}
 				});
 			}
@@ -188,25 +207,25 @@ public class IABBinder {
 	}
 	
 	// Get inventory information
-	public void inventoryInfo(String[] skus){
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Inventory Request !!!");
-		
-		if(myInventory != null){
-			for(String sku:skus){
-				SkuDetails detail = myInventory.getSkuDetails(sku);
-				if(detail != null){
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
-							"Product: " + detail.getTitle() +
-							"\nPrice: " + detail.getPrice() +
-							"\nDescription" + detail.getDescription() +"\n");
-				}else{
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
-				}
-			}
-		}else{
-			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
-		}
-	}
+//	public void inventoryInfo(String[] skus){
+//		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Inventory Request !!!");
+//		
+//		if(myInventory != null){
+//			for(String sku:skus){
+//				SkuDetails detail = myInventory.getSkuDetails(sku);
+//				if(detail != null){
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
+//							"Product: " + detail.getTitle() +
+//							"\nPrice: " + detail.getPrice() +
+//							"\nDescription" + detail.getDescription() +"\n");
+//				}else{
+//					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
+//				}
+//			}
+//		}else{
+//			UnityPlayer.UnitySendMessage(mEventHandler, TAG, " ### myInventory == null ###");
+//		}
+//	}
 	
 	// Consume product from the inventory information
 		public void consumeProduct(final String[] skus){
@@ -226,15 +245,6 @@ public class IABBinder {
 					        }else{
 					        	UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## consumeProduct-Do not Purchase: " + sku);
 					        }
-//							SkuDetails detail = myInventory.getSkuDetails(sku);
-//							if(detail != null){
-//								UnityPlayer.UnitySendMessage(mEventHandler, TAG, 
-//										"Product: " + detail.getTitle() +
-//										"\nPrice: " + detail.getPrice() +
-//										"\nDescription" + detail.getDescription() +"\n");
-//							}else{
-//								UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Sku: " + sku + " does not exist!");
-//							}
 						}
 					}
 				});
@@ -261,7 +271,7 @@ public class IABBinder {
 	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
 		
 		@Override
-		public void onIabPurchaseFinished(IabResult result, Purchase info) {
+		public void onIabPurchaseFinished(IabResult result, final Purchase info) {
 			// TODO Auto-generated method stub
 			if(result.isFailure()){
 				// sent a message to Unity gameObject with JSON format
@@ -283,7 +293,7 @@ public class IABBinder {
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPurchaseState: " + info.getPurchaseState());
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
 					setData(info.getSku(), mAmount);
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PURCHASE_FINISHED");
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"PURCHASE_FINISHED\"}");
 					mAmount = 0;
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
 				}
@@ -377,7 +387,7 @@ public class IABBinder {
 				e.printStackTrace();
 			} 
 		}
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "COMSUME_LOCAL_FINISHED");
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"COMSUME_LOCAL_FINISHED\"}");
 		return true;
 	}
 	
@@ -396,7 +406,7 @@ public class IABBinder {
 		boolean isSaved = editor.commit();
 		// Show if the data is saved successfully
 		if(isSaved && putString(FILE_KEY, TMP_KEY)){
-			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + String.valueOf(value) +" , "+String.valueOf(tmp));
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey +", "+ String.valueOf(value) +" , "+String.valueOf(tmp));
 		}else{
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Set Data: " + productKey + " DOES NOT BE SEAVED.");
 		}
@@ -410,7 +420,7 @@ public class IABBinder {
 			byte[] encryptedTextByte = aes.encrypt(current, aes.mSecretKey);
 			String encryptedText = new String(Base64.encodeBase64(encryptedTextByte));
 			
-			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
+//			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: " + encryptedText);
 			// write the key back
 			if(!putString(FILE_KEY, encryptedText)){
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: Fail to write the key");
@@ -426,7 +436,7 @@ public class IABBinder {
 		if (file.isDirectory()) {
 			String[] names = file.list();
 			for(int i = 0; i < names.length ; i++){
-				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Data Path: " + file.getPath() + "Child Path : " + names[i]);
+//				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Data Path: " + file.getPath() + "Child Path : " + names[i]);
 			}
 		}
 	}
@@ -482,6 +492,7 @@ public class IABBinder {
 	public int getValue(String sku){
 		if(checkFile()){
 			int tmp = mSharedPreferences.getInt(sku, -1);
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "!!!!!!mSharedPreferences value = " + tmp);
 			if(tmp != -1){
 				return tmp;
 			}else{
@@ -543,7 +554,7 @@ public class IABBinder {
 				toastMsg(e.toString());
 			} 
 		}
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "WEB_VERIFICATION");
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"WEB_VERIFICATION\"}");
 		return cryptedStr;
 	}
 	
