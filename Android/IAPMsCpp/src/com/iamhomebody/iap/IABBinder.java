@@ -449,7 +449,9 @@ public class IABBinder {
 		boolean isEqual = false;
 		// put tmp key
 		if(putString(FILE_KEY, TMP_KEY)){
-			HSA hsa = new HSA("/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml");
+			String filepath = "/data/data/com.iamhomebody.MsProject/shared_prefs/" + PREFS_NAME + ".xml";
+//			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "FilePath: "+filepath);
+			HSA hsa = new HSA(filepath);
 			current = hsa.calculateHSA();
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## checkFile-current: " + current);
 			try {
@@ -556,6 +558,16 @@ public class IABBinder {
 		}
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"WEB_VERIFICATION\"}");
 		return cryptedStr;
+	}
+	
+	public void showNetworkRSA(ResultData result){
+		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA.......");
+		if(result != null){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA-Message: "+result.message + "\n");
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA-Status: "+result.status + "\n");
+		}else{
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA-Message: result == null\n");
+		}
 	}
 	
 	//https setup
