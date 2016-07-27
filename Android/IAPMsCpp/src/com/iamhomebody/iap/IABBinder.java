@@ -41,6 +41,7 @@ public class IABBinder {
 	private int mRequestCode;
 	private String mPayload;
 	private String mOldRsa;
+	private String mVerificationUrl;
 	
 	// Data Store
 	SharedPreferences mSharedPreferences;
@@ -57,9 +58,10 @@ public class IABBinder {
 	}
 	// Constructor and initialize the IAB functionality
 	@SuppressLint("CommitPrefEdits")
-	public IABBinder(String base64EncodedPublicKey, String strEventHandler){
+	public IABBinder(String base64EncodedPublicKey, String strEventHandler, String verificationUrl){
 		mActivity = UnityPlayer.currentActivity;
 		mEventHandler = strEventHandler;
+		mVerificationUrl = verificationUrl;
 		// Get sharedPreferences instance
 		mSharedPreferences = mActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		String info = mSharedPreferences.getString(FILE_KEY, "NO_KEY");
@@ -280,7 +282,7 @@ public class IABBinder {
 		try {
 			mOldRsa = rsa();
 			NetworkRSA nRSA = new NetworkRSA(this);
-			nRSA.execute(mOldRsa);
+			nRSA.execute(mVerificationUrl,mOldRsa);
 		} catch (IOException e) {
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWebVerify-Error: "+e.getMessage());
 		}
@@ -326,7 +328,7 @@ public class IABBinder {
 					try {
 						newStr = rsa();
 						NetworkRsaUpdate updateHash = new NetworkRsaUpdate();
-						updateHash.execute(mOldRsa, newStr);
+						updateHash.execute(mVerificationUrl,mOldRsa, newStr);
 					} catch (IOException e) {
 						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWeb-Update-Error: "+e.getMessage());
 					}
@@ -432,7 +434,7 @@ public class IABBinder {
 		try {
 			mOldRsa = rsa();
 			NetworkRSA nRSA = new NetworkRSA(this);
-			nRSA.execute(mOldRsa);
+			nRSA.execute(mVerificationUrl,mOldRsa);
 		} catch (IOException e) {
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWebVerify-Error: "+e.getMessage());
 			return false;
@@ -638,9 +640,9 @@ public class IABBinder {
 				String newStr = "";
 				try {
 					newStr = rsa();
-					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"CUNSUMED_PRODUCT_FINISHED\"}");
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"CONSUMED_LOCAL_PRODUCT_FINISHED\"}");
 					NetworkRsaUpdate updateHash = new NetworkRsaUpdate();
-					updateHash.execute(mOldRsa, newStr);
+					updateHash.execute(mVerificationUrl,mOldRsa, newStr);
 				} catch (IOException e) {
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "ConsumeLocalProduct-Update-Error: "+e.getMessage());
 				}
