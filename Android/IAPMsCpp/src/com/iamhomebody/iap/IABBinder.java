@@ -36,7 +36,7 @@ public class IABBinder {
 	private int mAmount = 0;
 	// For RSA
 	private boolean ifRsaPurchase = false;
-	private boolean ifRsaConsumeLocal = false;
+	public boolean ifRsaConsumeLocal = false;
 	private String mSKU;
 	private int mRequestCode;
 	private String mPayload;
@@ -313,6 +313,7 @@ public class IABBinder {
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## Purchase Process-getPurchaseState: " + info.getPurchaseState());
 //					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\""+resultFlag+"\",\"desc\":\""+resultJSON+"\",\"sign\":\""+resultSignature+"\"}");
 					setData(info.getSku(), mAmount);
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase: Finished");
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"PURCHASE_FINISHED\"}");
 					mAmount = 0;
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
@@ -365,6 +366,7 @@ public class IABBinder {
 			if(result.isSuccess()){
 				//UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"3\",\"ret\":\"true\",\"desc\":\""+purchase.getOriginalJson().replace('\"', '\'')+"\",\"sign\":\""+purchase.getSignature()+"\"}");
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "### JAVA Consume is Success!");
+				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"CONSUMED_PRODUCT_FINISHED\"}");
 			}else{
 				//UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"3\",\"ret\":\"false\",\"desc\":\"\",\"sign\":\"\"}");
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "### JAVA Consume is not Success!");
@@ -418,7 +420,7 @@ public class IABBinder {
 				e.printStackTrace();
 			} 
 		}
-		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"COMSUME_LOCAL_FINISHED\"}");
+		if(!ifRsaConsumeLocal) UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"CONSUMED_LOCAL_PRODUCT_FINISHED\"}");
 		return true;
 	}
 	
@@ -433,6 +435,7 @@ public class IABBinder {
 			nRSA.execute(mOldRsa);
 		} catch (IOException e) {
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWebVerify-Error: "+e.getMessage());
+			return false;
 		}
 		return true;
 	}
@@ -629,12 +632,13 @@ public class IABBinder {
 			}
 		}else if(result.status && ifRsaConsumeLocal){
 			// TODO Implement the callback for consuming local products
-			ifRsaConsumeLocal = false;
 			if(consumeLocalProduct(mSKU, mAmount)){
 				// TODO Update server
+				ifRsaConsumeLocal = false;
 				String newStr = "";
 				try {
 					newStr = rsa();
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"CUNSUMED_PRODUCT_FINISHED\"}");
 					NetworkRsaUpdate updateHash = new NetworkRsaUpdate();
 					updateHash.execute(mOldRsa, newStr);
 				} catch (IOException e) {
