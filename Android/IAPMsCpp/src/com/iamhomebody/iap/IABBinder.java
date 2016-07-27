@@ -20,6 +20,7 @@ import android.util.Log;
 import android.widget.Toast;
 //import org.json.simple.JSONObject;
 
+
 import com.iamhomebody.iap.IABActivity;
 
 import org.apache.commons.codec.binary.Base64;
@@ -33,6 +34,12 @@ public class IABBinder {
 	private Inventory myInventory;
 	private String[] skus = {"product_1_coin", "produt_2_coin", "coin", "coins"};
 	private int mAmount = 0;
+	// For RSA
+	private boolean ifRsaPurchase = false;
+	private String mSKU;
+	private int mRequestCode;
+	private String mPayload;
+	private String mOldRsa;
 	
 	// Data Store
 	SharedPreferences mSharedPreferences;
@@ -77,7 +84,6 @@ public class IABBinder {
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## FirstCheckFile-commit: commit fail.");
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}else{
@@ -96,7 +102,6 @@ public class IABBinder {
 			
 			@Override
 			public void onIabSetupFinished(IabResult result) {
-				// TODO Auto-generated method stub
 				if(!result.isSuccess()){
 					// sent a message to Unity gameObject with JSON format
 					// UnitySendMessage(GameObject Name, Function Name, Agrs)
@@ -118,7 +123,6 @@ public class IABBinder {
 					@Override
 					public boolean callbackEventFunction(int requestCode, int resultCode,
 							Intent data) {
-						// TODO Auto-generated method stub
 						if(mIabHelper.handleActivityResult(requestCode, resultCode, data)){
 							return true;
 						}else{
@@ -161,7 +165,6 @@ public class IABBinder {
 //	};
 	
 	public void dispose() {
-		// TODO Auto-generated method stub
 		if(mIabHelper != null){
 			mIabHelper.dispose();
 		}
@@ -176,12 +179,10 @@ public class IABBinder {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				mIabHelper.queryInventoryAsync(true, Arrays.asList(skus), new IabHelper.QueryInventoryFinishedListener() {
 					
 					@Override
 					public void onQueryInventoryFinished(IabResult result, Inventory inv) {
-						// TODO Auto-generated method stub
 						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "JAVAInventory : " + result.getMessage());
 				    	myInventory = inv;
 				    	if(myInventory != null){
@@ -236,7 +237,6 @@ public class IABBinder {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
 						for(String sku:skus){
 							if (myInventory.hasPurchase(sku)) {
 					        	
@@ -268,11 +268,30 @@ public class IABBinder {
 		}
 	}
 	
+	// Purchase Web Verification
+	public void purchaseWebVerify(String SKU,int amount, String requestCode, String payload){
+		mAmount = amount;
+		ifRsaPurchase = true;
+		mSKU = SKU;
+		mRequestCode = Integer.parseInt(requestCode);
+		mPayload = payload;
+		mOldRsa = "";
+		try {
+			mOldRsa = rsa();
+			NetworkRSA nRSA = new NetworkRSA(this);
+			nRSA.execute(mOldRsa);
+		} catch (IOException e) {
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWebVerify-Error: "+e.getMessage());
+		}
+	}
+	
+	
+	
+	
 	IabHelper.OnIabPurchaseFinishedListener mPurchaseFinishedListener = new IabHelper.OnIabPurchaseFinishedListener() {
 		
 		@Override
 		public void onIabPurchaseFinished(IabResult result, final Purchase info) {
-			// TODO Auto-generated method stub
 			if(result.isFailure()){
 				// sent a message to Unity gameObject with JSON format
 //				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"2\",\"ret\":\"false\",\"desc\":\"\",\"sign\":\"\"}");
@@ -296,6 +315,18 @@ public class IABBinder {
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"PURCHASE_FINISHED\"}");
 					mAmount = 0;
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## JAVA Purchase-SetData: Finish SetData");
+				}
+				
+				if(ifRsaPurchase){
+					// TODO Update server
+					String newStr = "";
+					try {
+						newStr = rsa();
+						NetworkRsaUpdate updateHash = new NetworkRsaUpdate();
+						updateHash.execute(mOldRsa, newStr);
+					} catch (IOException e) {
+						UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWeb-Update-Error: "+e.getMessage());
+					}
 				}
 			}
 		}
@@ -329,7 +360,6 @@ public class IABBinder {
 		
 		@Override
 		public void onConsumeFinished(Purchase purchase, IabResult result) {
-			// TODO Auto-generated method stub
 			if(result.isSuccess()){
 				//UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"code\":\"3\",\"ret\":\"true\",\"desc\":\""+purchase.getOriginalJson().replace('\"', '\'')+"\",\"sign\":\""+purchase.getSignature()+"\"}");
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "### JAVA Consume is Success!");
@@ -383,7 +413,6 @@ public class IABBinder {
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: Fail to write the key");
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
 		}
@@ -426,7 +455,6 @@ public class IABBinder {
 				UnityPlayer.UnitySendMessage(mEventHandler, TAG, "## setData-encryptedText: Fail to write the key");
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		
@@ -473,7 +501,6 @@ public class IABBinder {
 					return false;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				toastMsg(e.toString());
 			} 
@@ -515,14 +542,16 @@ public class IABBinder {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				Toast.makeText(mActivity, str, Toast.LENGTH_LONG).show();
 			}
 			
 		});
 	}
 	
-	// RSA
+	/**
+	 * Encrypt the file hash by using RSA encryption
+	 * @return		String		encrypted hash
+	 * */
 	public String rsa() throws IOException{
 		String current;
 		String cryptedStr = null;
@@ -551,7 +580,6 @@ public class IABBinder {
 					return cryptedStr;
 				}
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 				toastMsg(e.toString());
 			} 
@@ -560,6 +588,10 @@ public class IABBinder {
 		return cryptedStr;
 	}
 	
+	/**
+	 * The network callback function by using RSA encryption to verify user data
+	 * @param	ResultData		data object which parses the JSON file
+	 * */
 	public void showNetworkRSA(ResultData result){
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA.......");
 		if(result != null){
@@ -568,9 +600,25 @@ public class IABBinder {
 		}else{
 			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "showNetworkRSA-Message: result == null\n");
 		}
+		
+		if(result.status && ifRsaPurchase){
+			// TODO Implement the callback for purchasing products
+			if(mIabHelper != null && checkFile()){
+				mIabHelper.launchPurchaseFlow(mActivity, mSKU, mRequestCode, mPurchaseFinishedListener, mPayload);
+			}else{
+				if(!checkFile()){
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Purchase-RSA-Process: File Data has been compromised");
+				}
+			}
+		}else if(!result.status){
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Purchase-RSA-Process: File Data has been compromised. result.status = False");
+			toastMsg("This app is compromised!");
+		}
 	}
 	
-	//https setup
+	/**
+	 * Enforce the android device trust self-provide https sever
+	 * */
 	public void httpsTrust(){
 		try{
 			InputStream inputStream = mActivity.getAssets().open("ServerKey.crt");
