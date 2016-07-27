@@ -33,8 +33,8 @@ public class NetworkRsaUpdate  extends AsyncTask<String, Void, ResultData>{
         String paramsString = params[0];
         String paramsStringUpdate = params[1];
 
-//        String ServerURL = "http://192.168.58.1:12120/verification";
-        String ServerURL = "https://192.168.58.1:12120/verification";
+        String ServerURL = "http://192.168.58.1:12120/verification";
+//        String ServerURL = "https://192.168.58.1:12120/verification";
         String username = "marklai";
         Log.d("Params",paramsString);
         Log.d("Params",paramsStringUpdate);

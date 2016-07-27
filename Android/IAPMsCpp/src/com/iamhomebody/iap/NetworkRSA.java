@@ -43,8 +43,8 @@ public class NetworkRSA extends AsyncTask<String, Void, ResultData>{
         }
         String paramsString = params[0];
 
-//        String ServerURL = "http://192.168.58.1:12120/verification";
-        String ServerURL = "https://192.168.58.1:12120/verification";
+        String ServerURL = "http://192.168.58.1:12120/verification";
+//        String ServerURL = "https://192.168.58.1:12120/verification";
         String username = "marklai";
 //        String hash = "RkJnOlLHM010GBcEomRhMcKUrYQ=";
 //        String ServerURL = "http://192.168.58.1:5000/encryption";

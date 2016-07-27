@@ -36,6 +36,7 @@ public class IABBinder {
 	private int mAmount = 0;
 	// For RSA
 	private boolean ifRsaPurchase = false;
+	private boolean ifRsaConsumeLocal = false;
 	private String mSKU;
 	private int mRequestCode;
 	private String mPayload;
@@ -319,6 +320,7 @@ public class IABBinder {
 				
 				if(ifRsaPurchase){
 					// TODO Update server
+					ifRsaPurchase = false;
 					String newStr = "";
 					try {
 						newStr = rsa();
@@ -417,6 +419,21 @@ public class IABBinder {
 			} 
 		}
 		UnityPlayer.UnitySendMessage(mEventHandler, TAG, "{\"messageTag\":\"COMSUME_LOCAL_FINISHED\"}");
+		return true;
+	}
+	
+	public boolean consumeLocalProductWebVerify(String SKU, int amount) {
+		mAmount = amount;
+		mSKU = SKU;
+		mOldRsa = "";
+		ifRsaConsumeLocal = true;
+		try {
+			mOldRsa = rsa();
+			NetworkRSA nRSA = new NetworkRSA(this);
+			nRSA.execute(mOldRsa);
+		} catch (IOException e) {
+			UnityPlayer.UnitySendMessage(mEventHandler, TAG, "PurchaseWebVerify-Error: "+e.getMessage());
+		}
 		return true;
 	}
 	
@@ -608,6 +625,20 @@ public class IABBinder {
 			}else{
 				if(!checkFile()){
 					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "Purchase-RSA-Process: File Data has been compromised");
+				}
+			}
+		}else if(result.status && ifRsaConsumeLocal){
+			// TODO Implement the callback for consuming local products
+			ifRsaConsumeLocal = false;
+			if(consumeLocalProduct(mSKU, mAmount)){
+				// TODO Update server
+				String newStr = "";
+				try {
+					newStr = rsa();
+					NetworkRsaUpdate updateHash = new NetworkRsaUpdate();
+					updateHash.execute(mOldRsa, newStr);
+				} catch (IOException e) {
+					UnityPlayer.UnitySendMessage(mEventHandler, TAG, "ConsumeLocalProduct-Update-Error: "+e.getMessage());
 				}
 			}
 		}else if(!result.status){
